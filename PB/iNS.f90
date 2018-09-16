@@ -602,7 +602,7 @@ do ExtIter = 1,nExtIter
    do j=1,Ny
    iPoint = i + (j-1)*Nx
     !--- Zero velocity ---!
-     U_old(1:2,iPoint) = 0.0
+     U_old(1:2,iPoint) = 1.0
      
      !--- Update residual ---!
      R(1:2,iPoint) = 0.0
