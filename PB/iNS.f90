@@ -1,4 +1,4 @@
-!Program to solve Lid driven cavity using SIMPLE 
+!Program to solve channel flow using SIMPLE 
 !Implementation based on SU2 
 !Governing Eqn:
 !             \partial_t U + \nabla F_c - \nabla F_v = Q
@@ -7,10 +7,9 @@
 !(\frac{\Omega_i}{\Delat t^n} + \frac{\partial R_i(U^n)}{\partial U_j}).\Delata U_j^n = -R_i(U^n)
 !Residual, R_i(U) = \Sigma_{j\in N(i)} (F_{c_{ij}} - F_{v_{ij}})\Delta S_{ij} - Q_i|\Omega_i|
 !Jacobian, J_{ij} = \frac{\partial R_i(U^n)}{\partial U_j}
-program iNS
+module global_vars
 
-implicit none
-
+!implicit none
 integer             :: i,j,k,Nx,Ny,iPoint,jpoint,nPoint,nDim,jDim,nVar,iVar,p_screen1,p_screen2
 integer             :: ExtIter,PIter,MIter,nExtIter,nPIter,nMIter,convergence,liniter,wrt_data
 real*8              :: dx,dy,vol,area,Lx,Ly,xmin,ymin,Res_mass,alfa,kappa
@@ -24,142 +23,15 @@ real*8,allocatable  :: U(:,:),U_old(:,:),Sol(:,:),Fc(:,:,:),Fv(:,:,:)
 real*8,allocatable  :: R(:,:),Jac(:,:),P(:,:),V(:,:,:),Res(:),Mat(:,:)
 real*8,allocatable  :: GradU(:,:,:,:),Solp(:),Tot_Jac(:,:),Tot_R(:),Tot_Sol(:)
 logical             :: implicit_time,upwind
-!--- Output Files ---!
-open(unit=10,file='Solver_details.txt',status='unknown')
-!open(unit=11,file='Jacobian_Eq1.txt',status='unknown')
 
-!open(unit=13,file='Residual.txt',status='unknown')
-!open(unit=14,file='Centerline.txt',status='unknown')
-open(unit=16,file='Convbudgetspb.txt',status='unknown')
-open(unit=17,file='Viscbudgetspb.txt',status='unknown')
-open(unit=18,file='presbudgetspb.txt',status='unknown')
-open(unit=20,file='Rpb.txt',status='unknown')
-!--- Grid definition ---!
-! *---*---*---*---*   j=Ny
-! *---*---*---*---*    .
-! *---*---*---*---*    .
-! *---*---*---*---*    .
-! *---*---*---*---*   j=1
-!i=1,...........,i=Nx
 
-Lx = 5.1
-Ly = 0.5
-Nx = 35
-Ny = 55
-nPoint = Nx*Ny
-nDim = 2
-xmin = -0.1
-ymin = 0.0
-dx = Lx/(Nx-1)
-dy = Ly/(Ny-1)
-area = dx
-Vol = dx*dy
-nVar = nDim
-wrt_data = 0
-allocate(x(Nx,Ny),y(Nx,Ny),P(Nx,Ny))
-allocate(U(2,Nx*Ny),U_old(2,Nx*Ny),Sol(3,Nx*Ny),V(3,Nx,Ny),Fc(2,Nx,Ny),Fv(2,Nx,Ny),P_Correc(nPoint))
-allocate(R(3,Nx*Ny),Jac(nPoint,nPoint),GradU(3,2,Nx,Ny),Res(Nx*Ny*nVar),Mass(Nx*Ny),D(2,Nx*Ny))
-allocate(Tot_Jac(Nx*Ny*nVar,Nx*Ny*nVar),Tot_R(Nx*Ny*nVar),Tot_Sol(Nx*Ny*nVar))
+end module global_vars
 
-do i=1,Nx
- do j=1,Ny
-    x(i,j) = xmin + (i-1)*dx
-    y(i,j) = ymin + (j-1)*dy
-    if (x(i,j).lt.0.0) k = i
- enddo
-enddo
+subroutine compute_gradient
 
-!--- Flow defintion ---!
+use global_vars
 
-U_inf = 1.0
-P_inf = 0.0
-P_outlet = 0.0
-rho = 1.0
-Re_l = 1.0
-mu = 1.d0/400.d0!0.798e-3
-Re = (Re_l*U_inf*rho)/mu
-artvisc = 4.0
-CFL = 0.1
-nExtIter = 200
-nMIter = 500
-nPIter = 100
-alfa = 0.9
-p_screen1 = 250
-p_screen2 = 50
-!--- Initialize variables ---!
-
-do i=1,Nx
- do j=1,Ny
-    V(1:3,i,j) = 0.0
-    Fc(1:2,i,j) = 0.0
-    Fv(1:2,i,j) = 0.0
-    P(i,j) = 0.0
- enddo
-enddo
-
-do iPoint = 1,nPoint
- U(1,iPoint) = 0.0
- U_old(1,iPoint) = 0.0
- U(2,iPoint) = 0.0
- U_old(2,iPoint) = 0.0
-enddo
-
-!--- Set Time step ---!
-lambda_inv = 2*U_inf*dy
-lambda_visc = mu*area*area/rho
-dt_v = CFL*0.25*Vol*Vol/lambda_visc
-!dt = min(dt_i,dt_v)
-dt_m = 1.0e-4
-dt_p = 1.0e-4
-implicit_time = .false.
-upwind = .true.
-Param_p = 0.3
-kappa = 3.0d-1
-write(10,*)'Lambda_inv: ',lambda_inv
-write(10,*)'Lambda_visc: ',lambda_visc
-write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
-write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
-write(10,*)'dt: ',dt
-write(10,*)'Area',area
-write(10,*)'Vol: ',Vol
-write(10,*)'Re: ',Re
-write(10,*)'dx: ',dx
-write(10,*)'dy: ',dy
-write(10,*)'rho: ',rho
-write(10,*)'xmin: ',xmin
-write(10,*)'xmax: ',x(Nx,Ny)
-write(10,*)'kappa: ',kappa
-close(10)
-!--- Begin Solver ---!
-
-do ExtIter = 1,nExtIter
-!----------------------------------------------------------------------!
-!---------------------- Solve momentum equation -----------------------!
-!----------------------------------------------------------------------!
-  do MIter = 1,nMIter
-   R = 0.0
-   Tot_Jac = 0.0
-   !print*,'Iteration...........',ExtIter
-   !--- Set old solution ---!
-   !print*,'Set new sol'
-   do iPoint=1,nPoint
-     U_old(1:2,iPoint) = U(1:2,iPoint)
-     !print*,U_old(1:2,iPoint),iPoint
-   enddo
-   !P((Nx-1)/2+1,1) = P_inf
-   
-   
-   !--- Set Primitive ---!
-   !--- 1 -> u, 2 -> v, 3 ->P ---!
-   do i=1,Nx
-    do j=1,Ny
-    iPoint = i + (j-1)*Nx
-      V(1:2,i,j) = U_old(1:2,iPoint)
-      V(3,i,j) = P(i,j)
-    enddo
-   enddo
-   
-   !--- Compute gradients at nodes ---!
+!--- Compute gradients at nodes ---!
    do i=2,Nx-1
     do j=1,Ny
        !--- (var,dim,i,j) ---!
@@ -253,7 +125,224 @@ do ExtIter = 1,nExtIter
    GradU(2,2,i,j) = (V(2,i,j+1) - V(2,i,j))/dy
    GradU(3,1,i,j) = (V(3,i,j) - V(3,i-1,j))/dx
    GradU(3,2,i,j) = (V(3,i,j+1) - V(3,i,j))/dy
- 
+
+end subroutine compute_gradient
+
+subroutine allocate_vars
+
+use global_vars
+
+allocate(x(Nx,Ny),y(Nx,Ny),P(Nx,Ny))
+allocate(U(2,Nx*Ny),U_old(2,Nx*Ny),Sol(3,Nx*Ny),V(3,Nx,Ny),Fc(2,Nx,Ny),Fv(2,Nx,Ny),P_Correc(nPoint))
+allocate(R(3,Nx*Ny),Jac(nPoint,nPoint),GradU(3,2,Nx,Ny),Res(Nx*Ny*nVar),Mass(Nx*Ny),D(2,Nx*Ny))
+allocate(Tot_Jac(Nx*Ny*nVar,Nx*Ny*nVar),Tot_R(Nx*Ny*nVar),Tot_Sol(Nx*Ny*nVar))
+
+end subroutine allocate_vars
+
+subroutine initialize_vars
+
+use global_vars
+
+do i=1,Nx
+ do j=1,Ny
+    x(i,j) = xmin + (i-1)*dx
+    y(i,j) = ymin + (j-1)*dy
+    if (x(i,j).lt.0.0) k = i
+ enddo
+enddo
+
+!--- Flow defintion ---!
+
+U_inf = 1.0
+P_inf = 0.0
+P_outlet = 0.0
+rho = 1.0
+Re_l = 1.0
+mu = 1.d0/400.d0!0.798e-3
+Re = (Re_l*U_inf*rho)/mu
+artvisc = 4.0
+CFL = 0.1
+nExtIter = 200
+nMIter = 500
+nPIter = 100
+alfa = 0.9
+p_screen1 = 250
+p_screen2 = 50
+!--- Initialize variables ---!
+
+do i=1,Nx
+ do j=1,Ny
+    V(1:3,i,j) = 0.0
+    Fc(1:2,i,j) = 0.0
+    Fv(1:2,i,j) = 0.0
+    P(i,j) = 0.0
+ enddo
+enddo
+
+do iPoint = 1,nPoint
+ U(1,iPoint) = 0.0
+ U_old(1,iPoint) = 0.0
+ U(2,iPoint) = 0.0
+ U_old(2,iPoint) = 0.0
+enddo
+
+end subroutine initialize_vars
+
+subroutine implicit_euler
+
+use global_vars
+
+do iPoint=1,nPoint
+        Tot_R((iPoint-1)*nVar+1) = -R(1,iPoint)
+        Tot_R((iPoint-1)*nVar+2) = -R(2,iPoint)
+       
+        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + Vol/dt
+        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + Vol/dt 
+        
+        Tot_Sol((iPoint-1)*nVar+1) = 0.0
+        Tot_Sol((iPoint-1)*nVar+2) = 0.0
+     enddo
+     
+     if (modulo(ExtIter,2) .eq. 0) print*,'Starting Solve.....',Extiter
+     convergence = -2
+     liniter = 1000
+     !--- Solve ---!
+     Mat = Tot_Jac
+     call seidel(0,nPoint*nVar,Mat,Tot_R(:),1.d0,Tot_Sol(:),Res(:),liniter,convergence)
+     if (convergence .ne. 0) print*, 'Error in mom',convergence,ExtIter
+     if (modulo(ExtIter,5000) .eq. 0) print*,'Finished mom'
+     do iPoint =1,nPoint
+        U(1,iPoint) = U_old(1,iPoint) + Tot_Sol((iPoint-1)*nVar+1)
+        U(2,iPoint) = U_old(2,iPoint) + Tot_Sol((iPoint-1)*nVar+2)
+     enddo
+
+
+end subroutine implicit_euler
+
+subroutine explicit_euler
+
+use global_vars
+
+Sol(1:2,:) = 0.0
+     do iPoint=1,nPoint
+        U(1,iPoint) = U_old(1,iPoint) - alfa*R(1,iPoint)*dt_m/Vol
+        U(2,iPoint) = U_old(2,iPoint) - alfa*R(2,iPoint)*dt_m/Vol
+        
+        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol/(dt_m*alfa)
+        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol/(dt_m*alfa)
+        
+        Res_l2 = Res_l2 + R(1,iPoint)**2.0
+        D(1,iPoint) = Vol/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+        D(2,iPoint) = Vol/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+        
+     enddo
+     Res_l2 = sqrt(Res_l2/nPoint)
+     if (modulo(MIter,p_screen1) .eq. 0) print*,'Res: ',Res_l2,MIter,ExtIter
+
+end subroutine explicit_euler
+
+
+program iNS
+
+use global_vars
+
+implicit none
+
+!--- Output Files ---!
+open(unit=10,file='Solver_details.txt',status='unknown')
+!open(unit=11,file='Jacobian_Eq1.txt',status='unknown')
+
+!open(unit=13,file='Residual.txt',status='unknown')
+!open(unit=14,file='Centerline.txt',status='unknown')
+open(unit=16,file='Convbudgetspb.txt',status='unknown')
+open(unit=17,file='Viscbudgetspb.txt',status='unknown')
+open(unit=18,file='presbudgetspb.txt',status='unknown')
+open(unit=20,file='Rpb.txt',status='unknown')
+!--- Grid definition ---!
+! *---*---*---*---*   j=Ny
+! *---*---*---*---*    .
+! *---*---*---*---*    .
+! *---*---*---*---*    .
+! *---*---*---*---*   j=1
+!i=1,...........,i=Nx
+
+Lx = 5.1
+Ly = 0.5
+Nx = 35
+Ny = 55
+nPoint = Nx*Ny
+nDim = 2
+xmin = -0.1
+ymin = 0.0
+dx = Lx/(Nx-1)
+dy = Ly/(Ny-1)
+area = dx
+Vol = dx*dy
+nVar = nDim
+wrt_data = 0
+
+call allocate_vars
+
+call initialize_vars
+
+!--- Set Time step ---!
+lambda_inv = 2*U_inf*dy
+lambda_visc = mu*area*area/rho
+dt_v = CFL*0.25*Vol*Vol/lambda_visc
+!dt = min(dt_i,dt_v)
+dt_m = 2.0e-4
+dt_p = 2.0e-4
+implicit_time = .false.
+upwind = .true.
+Param_p = 0.3
+kappa = 0.0!5.0d-2
+
+write(10,*)'Lambda_inv: ',lambda_inv
+write(10,*)'Lambda_visc: ',lambda_visc
+write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
+write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
+write(10,*)'dt: ',dt
+write(10,*)'Area',area
+write(10,*)'Vol: ',Vol
+write(10,*)'Re: ',Re
+write(10,*)'dx: ',dx
+write(10,*)'dy: ',dy
+write(10,*)'rho: ',rho
+write(10,*)'xmin: ',xmin
+write(10,*)'xmax: ',x(Nx,Ny)
+write(10,*)'kappa: ',kappa
+close(10)
+!--- Begin Solver ---!
+
+do ExtIter = 1,nExtIter
+!----------------------------------------------------------------------!
+!---------------------- Solve momentum equation -----------------------!
+!----------------------------------------------------------------------!
+  do MIter = 1,nMIter
+   R = 0.0
+   Tot_Jac = 0.0
+   !print*,'Iteration...........',ExtIter
+   !--- Set old solution ---!
+   !print*,'Set new sol'
+   do iPoint=1,nPoint
+     U_old(1:2,iPoint) = U(1:2,iPoint)
+     !print*,U_old(1:2,iPoint),iPoint
+   enddo
+   !P((Nx-1)/2+1,1) = P_inf
+   
+   
+   !--- Set Primitive ---!
+   !--- 1 -> u, 2 -> v, 3 ->P ---!
+   do i=1,Nx
+    do j=1,Ny
+    iPoint = i + (j-1)*Nx
+      V(1:2,i,j) = U_old(1:2,iPoint)
+      V(3,i,j) = P(i,j)
+    enddo
+   enddo
+   
+   
+ call compute_gradient
    
    !--- Compute spatial discretization ---!
    if (wrt_data .eq. 1) then
@@ -572,7 +661,7 @@ do ExtIter = 1,nExtIter
     endif
        !--- Update residual ---!
        
-       R(1:2,iPoint) = Fc(1:2,i,j) - Fv(1:2,i,j)
+       R(1:2,iPoint) = Fc(1:2,i,j) !- Fv(1:2,i,j)
        
        !--- Source term (pressure only) ---!
     if (i.ne.Nx) then
@@ -671,8 +760,8 @@ do ExtIter = 1,nExtIter
     ! U_old(1:2,iPoint) = 0.0
      
      !--- Update residual ---!
-     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! (rho*U)*U|_e
-     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! (rho*V)*U|_e
+     R(1,iPoint) = R(1,iPoint) + rho*U_old(1,iPoint)*dy*U_old(1,iPoint) ! (rho*U)*U|_e
+     R(2,iPoint) = R(2,iPoint) + rho*U_old(1,iPoint)*dy*U_old(2,iPoint) ! (rho*V)*U|_e
      
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
@@ -707,47 +796,12 @@ do ExtIter = 1,nExtIter
 
    if (implicit_time) then
    !--- Time Integration (Implicit) ---!
-     do iPoint=1,nPoint
-        Tot_R((iPoint-1)*nVar+1) = -R(1,iPoint)
-        Tot_R((iPoint-1)*nVar+2) = -R(2,iPoint)
-       
-        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + Vol/dt
-        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + Vol/dt 
-        
-        Tot_Sol((iPoint-1)*nVar+1) = 0.0
-        Tot_Sol((iPoint-1)*nVar+2) = 0.0
-     enddo
-     
-     if (modulo(ExtIter,2) .eq. 0) print*,'Starting Solve.....',Extiter
-     convergence = -2
-     liniter = 1000
-     !--- Solve ---!
-     Mat = Tot_Jac
-     call seidel(0,nPoint*nVar,Mat,Tot_R(:),1.d0,Tot_Sol(:),Res(:),liniter,convergence)
-     if (convergence .ne. 0) print*, 'Error in mom',convergence,ExtIter
-     if (modulo(ExtIter,5000) .eq. 0) print*,'Finished mom'
-     do iPoint =1,nPoint
-        U(1,iPoint) = U_old(1,iPoint) + Tot_Sol((iPoint-1)*nVar+1)
-        U(2,iPoint) = U_old(2,iPoint) + Tot_Sol((iPoint-1)*nVar+2)
-     enddo
+   call implicit_euler
    
    else   
    !--- Time Integration (Explicit) ---!
-     Sol(1:2,:) = 0.0
-     do iPoint=1,nPoint
-        U(1,iPoint) = U_old(1,iPoint) - alfa*R(1,iPoint)*dt_m/Vol
-        U(2,iPoint) = U_old(2,iPoint) - alfa*R(2,iPoint)*dt_m/Vol
-        
-        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol/(dt_m*alfa)
-        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol/(dt_m*alfa)
-        
-        Res_l2 = Res_l2 + R(1,iPoint)**2.0
-        D(1,iPoint) = Vol/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
-        D(2,iPoint) = Vol/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-        
-     enddo
-     Res_l2 = sqrt(Res_l2/nPoint)
-     if (modulo(MIter,p_screen1) .eq. 0) print*,'Res: ',Res_l2,MIter,ExtIter
+   call explicit_euler
+     
    endif
    
 enddo   !MIter
@@ -1435,6 +1489,13 @@ do PIter = 1,nPIter
     close(24)
     open(unit=34,file='Outlet_channel.txt',status='unknown')
      i = Nx
+     do j=1,Ny
+       iPoint = i + (j-1)*Nx
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
+     enddo
+    close(34)
+    open(unit=34,file='Interior_channel.txt',status='unknown')
+     i = Nx-4
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
