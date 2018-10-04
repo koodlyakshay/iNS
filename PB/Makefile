@@ -1,9 +1,11 @@
-PROG = iNS
+PROG =	iNS
 
-SRCS =	iNS.f90 mod_global.f90 \
-	sub_compute_gradients.f90
+SRCS =	iNS.f90 mod_global.f90 sub_allocate_vars.f90 \
+	sub_compute_gradients.f90 sub_explicit_euler.f90 \
+	sub_implicit_euler.f90 sub_initialize_vars.f90
 
-OBJS =	iNS.o mod_global.o sub_compute_gradients.o
+OBJS =	iNS.o mod_global.o sub_allocate_vars.o sub_compute_gradients.o \
+	sub_explicit_euler.o sub_implicit_euler.o sub_initialize_vars.o
 
 LIBS =	
 
@@ -29,4 +31,8 @@ clean:
 	$(F90) $(F90FLAGS) -c $<
 
 iNS.o: mod_global.o
+sub_allocate_vars.o: mod_global.o
 sub_compute_gradients.o: mod_global.o
+sub_explicit_euler.o: mod_global.o
+sub_implicit_euler.o: mod_global.o
+sub_initialize_vars.o: mod_global.o
