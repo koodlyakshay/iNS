@@ -1,0 +1,5 @@
+&solver 
+ wrt_data = 0
+ implicit_time = .false.
+ upwind = .true.
+/
