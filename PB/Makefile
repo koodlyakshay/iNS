@@ -3,7 +3,7 @@ PROG = iNS
 SRCS =	iNS.f90 mod_global.f90 \
 	sub_compute_gradients.f90
 
-OBJS =	iNS.o iNS_backup.o iNS_upwind.o mod_global.o sub_compute_gradients.o
+OBJS =	iNS.o mod_global.o sub_compute_gradients.o
 
 LIBS =	
 
