@@ -1,6 +1,6 @@
 module global_vars
 
-!implicit none
+implicit none
 integer             :: i,j,k,Nx,Ny,iPoint,jpoint,nPoint,nDim,jDim,nVar,iVar,p_screen1,p_screen2
 integer             :: ExtIter,PIter,MIter,nExtIter,nPIter,nMIter,convergence,liniter,wrt_data
 real*8              :: dx,dy,vol,area,Lx,Ly,xmin,ymin,Res_mass,alfa,kappa
@@ -14,6 +14,8 @@ real*8,allocatable  :: U(:,:),U_old(:,:),Sol(:,:),Fc(:,:,:),Fv(:,:,:)
 real*8,allocatable  :: R(:,:),Jac(:,:),P(:,:),V(:,:,:),Res(:),Mat(:,:)
 real*8,allocatable  :: GradU(:,:,:,:),Solp(:),Tot_Jac(:,:),Tot_R(:),Tot_Sol(:)
 logical             :: implicit_time,upwind
-
+namelist            /grid/ Lx,Ly,Nx,Ny,xmin,ymin
+namelist            /solver/ wrt_data,implicit_time,upwind
+namelist            /numerics/ kappa,Param_p,dt_m,dt_p
 
 end module global_vars

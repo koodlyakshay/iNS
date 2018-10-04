@@ -45,4 +45,21 @@ do iPoint = 1,nPoint
  U_old(2,iPoint) = 0.0
 enddo
 
+
+open(unit=10,file='out/Solver_details.txt',status='unknown')
+write(10,*)'Lambda_inv: ',lambda_inv
+write(10,*)'Lambda_visc: ',lambda_visc
+write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
+write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
+write(10,*)'Vol: ',Vol
+write(10,*)'Re: ',Re
+write(10,*)'dx: ',dx
+write(10,*)'dy: ',dy
+write(10,*)'rho: ',rho
+write(10,*)'xmin: ',xmin
+write(10,*)'xmax: ',x(Nx,Ny)
+write(10,*)'kappa: ',kappa
+close(10)
+
+
 end subroutine initialize_vars

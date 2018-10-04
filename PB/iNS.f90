@@ -13,70 +13,19 @@ use global_vars
 
 implicit none
 
-!--- Output Files ---!
-open(unit=10,file='out/Solver_details.txt',status='unknown')
-!open(unit=11,file='Jacobian_Eq1.txt',status='unknown')
-
-!open(unit=13,file='Residual.txt',status='unknown')
-!open(unit=14,file='Centerline.txt',status='unknown')
-open(unit=16,file='out/Convbudgetspb.txt',status='unknown')
-open(unit=17,file='out/Viscbudgetspb.txt',status='unknown')
-open(unit=18,file='out/presbudgetspb.txt',status='unknown')
-open(unit=20,file='out/Rpb.txt',status='unknown')
-!--- Grid definition ---!
-! *---*---*---*---*   j=Ny
-! *---*---*---*---*    .
-! *---*---*---*---*    .
-! *---*---*---*---*    .
-! *---*---*---*---*   j=1
-!i=1,...........,i=Nx
-
-Lx = 5.1
-Ly = 0.5
-Nx = 35
-Ny = 55
-nPoint = Nx*Ny
-nDim = 2
-xmin = -0.1
-ymin = 0.0
-dx = Lx/(Nx-1)
-dy = Ly/(Ny-1)
-area = dx
-Vol = dx*dy
-nVar = nDim
-wrt_data = 0
+call read_input
 
 call allocate_vars
 
 call initialize_vars
 
-!--- Set Time step ---!
-lambda_inv = 2*U_inf*dy
-lambda_visc = mu*area*area/rho
-dt_v = CFL*0.25*Vol*Vol/lambda_visc
-!dt = min(dt_i,dt_v)
-dt_m = 2.0e-4
-dt_p = 2.0e-4
-implicit_time = .false.
-upwind = .true.
-Param_p = 0.3
-kappa = 0.0!5.0d-2
+!--- Output Files ---!
+if (wrt_data .eq. 1) then
+  open(unit=16,file='out/Convbudgetspb.txt',status='unknown')
+  open(unit=17,file='out/Viscbudgetspb.txt',status='unknown')
+  open(unit=18,file='out/presbudgetspb.txt',status='unknown')
+endif
 
-write(10,*)'Lambda_inv: ',lambda_inv
-write(10,*)'Lambda_visc: ',lambda_visc
-write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
-write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
-write(10,*)'dt: ',dt
-write(10,*)'Area',area
-write(10,*)'Vol: ',Vol
-write(10,*)'Re: ',Re
-write(10,*)'dx: ',dx
-write(10,*)'dy: ',dy
-write(10,*)'rho: ',rho
-write(10,*)'xmin: ',xmin
-write(10,*)'xmax: ',x(Nx,Ny)
-write(10,*)'kappa: ',kappa
-close(10)
 !--- Begin Solver ---!
 
 do ExtIter = 1,nExtIter
@@ -86,15 +35,12 @@ do ExtIter = 1,nExtIter
   do MIter = 1,nMIter
    R = 0.0
    Tot_Jac = 0.0
-   !print*,'Iteration...........',ExtIter
+   
    !--- Set old solution ---!
-   !print*,'Set new sol'
+   
    do iPoint=1,nPoint
      U_old(1:2,iPoint) = U(1:2,iPoint)
-     !print*,U_old(1:2,iPoint),iPoint
-   enddo
-   !P((Nx-1)/2+1,1) = P_inf
-   
+   enddo   
    
    !--- Set Primitive ---!
    !--- 1 -> u, 2 -> v, 3 ->P ---!
@@ -106,24 +52,24 @@ do ExtIter = 1,nExtIter
     enddo
    enddo
    
+   !--- Compute gradients at nodes ---!
+   call compute_gradient
    
- call compute_gradient
    
-   !--- Compute spatial discretization ---!
    if (wrt_data .eq. 1) then
    write(16,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    write(17,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    write(18,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    endif
+   !--- Compute spatial discretization ---!
    
-   !--- Interior Nodes ---!
    do i=1,Nx
     do j=1,Ny
     !--- Node definition ---!
     iPoint = i + (j-1)*Nx
     
-    !--- Convective terms (1st order upwind) ---!    
+    !--- Convective terms (1st order upwind/Central) ---!    
     F_e = 0.d0
     F_w = 0.d0
     F_n = 0.d0
@@ -1258,189 +1204,16 @@ enddo
 
 close(11)
 close(12)
-
+if (wrt_data .eq. 1) then
 close(16)
 close(17)
 close(18)
-close(20)
+endif
 end program iNS
 
 
 
 
 
-subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
-parameter(ITERMAX=5000)            ! Maximal number of iterations
-parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
-  integer crit, n, iter, rc
-  REAL*8 mat(n,n),b(n),omega
-  REAL*8 x(n),residu(n)
-!*====================================================================*
-!*                                                                    *
-!*  seidel solves the linear system  mat * x = b  iteratively.        *
-!*  Here  mat  is a nonsingular  n x n  matrix, b is the right hand   *
-!*  side for the linear system and x is the solution.                 *
-!*                                                                    *
-!*  seidel uses the Gauss Seidel Method with relaxation for a given   *
-!*  relaxation coefficient 0 < omega < 2.                             *
-!*  If  omega = 1, the standard Gauss Seidel method (without          *
-!*  relaxation) is performed.                                         *
-!*                                                                    *
-!*====================================================================*
-!*                                                                    *
-!*   Applications:                                                    *
-!*   =============                                                    *
-!*      Solve linear systems with nonsingular system matrices that    *
-!*      satisfy one of the following criteria: row sum criterion,     *
-!*      column sum criterion or the criterion of Schmidt and v. Mises.*
-!*      Only if at least one of these criteria is satisfied for mat,  *
-!*      convergence of the scheme is guaranteed [See BIBLI 11].       *
-!*                                                                    *
-!*====================================================================*
-!*                                                                    *
-!*   Input parameters:                                                *
-!*   ================                                                 *
-!*      crit     integer crit                                         *
-!*               select criterion                                     *
-!*               =1 : row sum criterion                               *
-!*               =2 : column sum criterion                            *
-!*               =3 : criterion of Schmidt-v.Mises                    *
-!*               other : no check                                     *
-!*      n        integer n ( n > 0 )                                  *
-!*               size of mat, b and x                                 *
-!*      mat      REAL*8   mat(n,n)                                    *
-!*               Matrix of the liear system                           *
-!*      b        REAL*8 b(n)                                          *
-!*               Right hand side                                      *
-!*      omega    REAL*8 omega; (0 < omega < 2)                        *
-!*               Relaxation coefficient.                              *
-!*      x        REAL*8  x(n)                                         *
-!*               Starting vector for iteration                        *
-!*                                                                    *
-!*   Output parameters:                                               *
-!*   ==================                                               *
-!*      x        REAL*8  x(n)                                         *
-!*               solution vector                                      *
-!*      residu   REAL*8   residu(n)                                   *
-!*               residual vector  b - mat * x; close to zero vector   *
-!*      iter     integer iter                                         *
-!*               Number of iterations performed                       *
-!*      rc       integer return code                                  *
-!*               =  0     solution has been found                     *
-!*               =  1     n < 1  or omega <= 0 or omega >= 2          *
-!*               =  2     improper mat or b or x (not used here)      *
-!*               =  3     one diagonal element of mat vanishes        *
-!*               =  4     Iteration number exceeded                   *
-!*               = 11     column sum criterion violated               *
-!*               = 12     row sum criterion violated                  *
-!*               = 13     Schmidt-v.Mises criterion violated          *
-!*                                                                    *
-!*====================================================================*
-  REAL*8 tmp, eps;
 
-   rc = 0                       
-   iter = 0 !Initialize iteration counter
-  if (n<1.or.omega<=ZERO.or.omega>=TWO) then
-    rc=1
-    return
-  end if
-
-  eps = 1.d-6
-
-  do i=1, n                       !transform mat so that all
-                                          !diagonals equal 1
-    if (mat(i,i) == ZERO) then
-      rc=3
-      return
-    end if
-    tmp = ONE / mat(i,i)
-    do j=1, n
-      mat(i,j)= mat(i,j)*tmp
-    end do
-    b(i) = b(i)*tmp               !adjust right hand side b
-  
-  end do
-
-
-  !check convergence criteria
-  if (crit==1) then
-     do i = 1, n                  !row sum criterion
-       tmp=ZERO
-       do j=1,n
-         tmp = tmp + dabs(mat(i,j))
-       end do
-       if (tmp >= TWO) then
-         rc=11
-         return
-       end if 
-     end do
-  else if (crit==2) then  
-     do j=1, n                    !column sum criterion
-	   tmp=ZERO
-       do i=1,n
-         tmp = tmp + dabs(mat(i,j))
-       end do
-       if (tmp >= TWO) then
-         rc=12
-	 return
-       end if
-     end do
-  else if (crit==3) then
-     tmp=ZERO
-     do i=1, n
-       do j=1, n                  !criterion of Schmidt
-         tmp = tmp + mat(i,j)**2  !von Mises
-       end do
-     end do
-     tmp = DSQRT(tmp - ONE)
-     if (tmp >= ONE) then
-       rc=13
-       return
-     end if
-  end if
-
-  do i=1, n 
-    residu(i) = x(i)              !store x in residu
-  end do
-  
-
-  do while (iter <= ITERMAX)      !Begin iteration
-  
-    iter=iter+1
-
-    do i=1, n
-      tmp=b(i)
-      do j=1, n
-        tmp =  tmp - mat(i,j) * residu(j)
-      end do 
-      residu(i) = residu(i) + omega * tmp
-    end do
-
-    do i=1, n                     !check break-off criterion
-      tmp = x(i) - residu(i)
-      if (DABS (tmp) <= eps) then
-        x(i) = residu(i)          !If rc = 0 at end of loop
-        rc = 0                    !  -> stop iteration
-      else
-        do j=1, n 
-          x(j) = residu(j)
-        end do
-        rc = 4
-        goto 10
-      end if
-    end do
-    if (rc == 0) goto 20          !solution found
-10 end do                         !End iteration
-
-20 do i=1, n                      !find residual vector
-     tmp=b(i)
-     do j=1, n
-       tmp = tmp - mat(i,j) * x(j)
-     end do
-     residu(i) = tmp
-   end do
-
-  return
-
-end
 

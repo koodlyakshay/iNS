@@ -1,11 +1,12 @@
 PROG =	iNS
 
 SRCS =	iNS.f90 mod_global.f90 sub_allocate_vars.f90 \
-	sub_compute_gradients.f90 sub_explicit_euler.f90 \
-	sub_implicit_euler.f90 sub_initialize_vars.f90
+	sub_compute_gradients.f90 sub_explicit_euler.f90 sub_gauss_seidel.f90 \
+	sub_implicit_euler.f90 sub_initialize_vars.f90 sub_read_input.f90
 
 OBJS =	iNS.o mod_global.o sub_allocate_vars.o sub_compute_gradients.o \
-	sub_explicit_euler.o sub_implicit_euler.o sub_initialize_vars.o
+	sub_explicit_euler.o sub_gauss_seidel.o sub_implicit_euler.o \
+	sub_initialize_vars.o sub_read_input.o
 
 LIBS =	
 
@@ -36,3 +37,4 @@ sub_compute_gradients.o: mod_global.o
 sub_explicit_euler.o: mod_global.o
 sub_implicit_euler.o: mod_global.o
 sub_initialize_vars.o: mod_global.o
+sub_read_input.o: mod_global.o
