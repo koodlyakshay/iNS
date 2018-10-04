@@ -9,9 +9,9 @@ use global_vars
 ! *---*---*---*---*    .
 ! *---*---*---*---*   j=1
 !i=1,...........,i=Nx
-open(unit=16,file='inp/grid.inp',status='unknown')
-open(unit=17,file='inp/solver.inp',status='unknown')
-open(unit=18,file='inp/numerics.inp',status='unknown')
+open(unit=16,file='../inp/grid.inp',status='unknown')
+open(unit=17,file='../inp/solver.inp',status='unknown')
+open(unit=18,file='../inp/numerics.inp',status='unknown')
 
 read(16,grid)
 

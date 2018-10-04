@@ -21,9 +21,9 @@ call initialize_vars
 
 !--- Output Files ---!
 if (wrt_data .eq. 1) then
-  open(unit=16,file='out/Convbudgetspb.txt',status='unknown')
-  open(unit=17,file='out/Viscbudgetspb.txt',status='unknown')
-  open(unit=18,file='out/presbudgetspb.txt',status='unknown')
+  open(unit=16,file='../out/Convbudgetspb.txt',status='unknown')
+  open(unit=17,file='../out/Viscbudgetspb.txt',status='unknown')
+  open(unit=18,file='../out/presbudgetspb.txt',status='unknown')
 endif
 
 !--- Begin Solver ---!
@@ -1162,28 +1162,28 @@ do PIter = 1,nPIter
    !--- Output solution ---!
    if (modulo(ExtIter,1) .eq. 0) then
    
-   open(unit=14,file='out/Centerline_channel.txt',status='unknown')
+   open(unit=14,file='../out/Centerline_channel.txt',status='unknown')
      i = (Nx+1)/2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
      enddo
     close(14)
-    open(unit=24,file='out/Start_channel.txt',status='unknown')
+    open(unit=24,file='../out/Start_channel.txt',status='unknown')
      i = k+1
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
      enddo
     close(24)
-    open(unit=34,file='out/Outlet_channel.txt',status='unknown')
+    open(unit=34,file='../out/Outlet_channel.txt',status='unknown')
      i = Nx
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
      enddo
     close(34)
-    open(unit=34,file='out/Interior_channel.txt',status='unknown')
+    open(unit=34,file='../out/Interior_channel.txt',status='unknown')
      i = Nx-4
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -1194,7 +1194,7 @@ do PIter = 1,nPIter
 enddo !ExtIter
 
 
-open(unit=13,file='out/Solution.txt',status='unknown')
+open(unit=13,file='../out/Solution.txt',status='unknown')
 do j = 1,Ny
  do i=1,Nx
   iPoint = i+(j-1)*Nx

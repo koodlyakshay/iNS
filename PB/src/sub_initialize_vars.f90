@@ -46,7 +46,7 @@ do iPoint = 1,nPoint
 enddo
 
 
-open(unit=10,file='out/Solver_details.txt',status='unknown')
+open(unit=10,file='../out/Solver_details.txt',status='unknown')
 write(10,*)'Lambda_inv: ',lambda_inv
 write(10,*)'Lambda_visc: ',lambda_visc
 write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
