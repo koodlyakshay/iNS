@@ -1,8 +1,0 @@
-&grid
- Lx = 5.1
- Ly = 0.5
- Nx = 35
- Ny = 55
- xmin = -0.1
- ymin = 0.0
-/

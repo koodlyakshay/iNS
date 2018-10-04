@@ -1,6 +1,0 @@
-&numerics
- Param_p = 0.3
- kappa = 0.0
- dt_m = 2.0e-4
- dt_p = 2.0e-4
-/
