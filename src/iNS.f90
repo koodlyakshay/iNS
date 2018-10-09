@@ -106,8 +106,8 @@ do ExtIter = 1,nExtIter
     ! U_old(1:2,iPoint) = 0.0
      
      !--- Update residual ---!
-     R(1,iPoint) = R(1,iPoint) + rho*U_old(1,iPoint)*dy*U_old(1,iPoint) ! (rho*U)*U|_e
-     R(2,iPoint) = R(2,iPoint) + rho*U_old(1,iPoint)*dy*U_old(2,iPoint) ! (rho*V)*U|_e
+     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
+     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)
      
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
@@ -541,35 +541,35 @@ do PIter = 1,nPIter
      i = (Nx+1)/2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
+       write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
      enddo
     close(14)
     open(unit=24,file='../out/Start_channel.txt',status='unknown')
      i = k+1
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
+       write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
      enddo
     close(24)
     open(unit=34,file='../out/Outlet_channel.txt',status='unknown')
      i = Nx
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
      enddo
     close(34)
     open(unit=34,file='../out/Interior_channel.txt',status='unknown')
-     i = Nx-4
+     i = Nx-5
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
      enddo
     close(34)
    endif
 enddo !ExtIter
 
 
-open(unit=13,file='../out/Solution.txt',status='unknown')
+open(unit=13,file='../out/Solution_channel.txt',status='unknown')
 do j = 1,Ny
  do i=1,Nx
   iPoint = i+(j-1)*Nx

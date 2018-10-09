@@ -15,7 +15,7 @@ real*8,allocatable  :: R(:,:),Jac(:,:),P(:,:),V(:,:,:),Res(:),Mat(:,:)
 real*8,allocatable  :: GradU(:,:,:,:),Solp(:),Tot_Jac(:,:),Tot_R(:),Tot_Sol(:)
 logical             :: implicit_time,upwind
 namelist            /grid/ Lx,Ly,Nx,Ny,xmin,ymin
-namelist            /solver/ wrt_data,implicit_time,upwind
+namelist            /solver/ wrt_data,implicit_time,upwind,nExtIter,nPIter,nMIter,p_screen1,p_screen2
 namelist            /numerics/ kappa,Param_p,dt_m,dt_p
 
 end module global_vars

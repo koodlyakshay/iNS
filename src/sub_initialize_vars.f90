@@ -21,12 +21,8 @@ mu = 1.d0/400.d0!0.798e-3
 Re = (Re_l*U_inf*rho)/mu
 artvisc = 4.0
 CFL = 0.1
-nExtIter = 200
-nMIter = 500
-nPIter = 100
 alfa = 0.9
-p_screen1 = 250
-p_screen2 = 50
+
 !--- Initialize variables ---!
 
 do i=1,Nx

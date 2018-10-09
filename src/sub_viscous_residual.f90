@@ -115,7 +115,7 @@ use global_vars
       Fv(1,i,j) = F_e(1) + F_w(1) + F_n(1) + F_s(1) ! du/dx|_e - du/dx|_w + du/dy|_n - du/dy|_s
       Fv(2,i,j) = F_e(2) + F_w(2) + F_n(2) + F_s(2) ! dv/dx|_e - dv/dx|_w + dv/dy|_n - dv/dy|_s
        
-      !R(1:2,iPoint) = R(1:2,iPoint) - Fv(1:2,i,j)
+      R(1:2,iPoint) = R(1:2,iPoint) - Fv(1:2,i,j)
        
     enddo
    enddo
