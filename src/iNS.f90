@@ -56,6 +56,26 @@ do ExtIter = 1,nExtIter
    call pressure_residual
    
    !--- Apply BC ---!
+   !--- Right outlet (i=Nx) ---!
+   !Zero gradient at the wall. Only a convective flux is added. 
+   !The visc contribution is zero because of zero gradient.
+   i=Nx
+   do j=1,Ny
+   iPoint = i + (j-1)*Nx
+    !--- Velocity gradient is zero ---!
+    !--- Have to add convective flux as is ---!
+    ! U_old(1:2,iPoint) = 0.0
+     
+     !--- Update residual ---!
+     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
+     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)
+     
+     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
+     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
+     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.5*U(2,iPoint)
+     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + 0.5*U(1,iPoint)
+   enddo
+   
    !--- Lower wall (j=1) ---!
    j=1
    do i=1,Nx
@@ -94,28 +114,6 @@ do ExtIter = 1,nExtIter
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 1.0
      Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 1.0
    enddo
-   
-   !--- Right outlet (i=Nx) ---!
-   !Zero gradient at the wall. Only a convective flux is added. 
-   !The visc contribution is zero because of zero gradient.
-   i=Nx
-   do j=1,Ny
-   iPoint = i + (j-1)*Nx
-    !--- Velocity gradient is zero ---!
-    !--- Have to add convective flux as is ---!
-    ! U_old(1:2,iPoint) = 0.0
-     
-     !--- Update residual ---!
-     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
-     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)
-     
-     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
-     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
-     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.5*U(2,iPoint)
-     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + 0.5*U(1,iPoint)
-   enddo
-   
-   
    
    !--- Upper wall (j=Ny) ---!
    j=Ny
@@ -486,6 +484,15 @@ do PIter = 1,nPIter
     !print*,i,j,i,j+1,P(i,j+1)
    enddo
    
+   !--- Upper wall (j=Ny) ---!
+   j=Ny
+   do i=2,Nx-1
+    iPoint = i + (j-1)*Nx
+    P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+    !P(i,j) = P(i,j-1)
+    !print*,i,j,i,j-1,P(i,j-1)
+   enddo
+   
    !--- Left inlet (i=1) ---!
    i=1
    do j=2,Ny
@@ -523,14 +530,7 @@ do PIter = 1,nPIter
     !print*,i,j,i-1,j,P(i-1,j)
    enddo
    
-   !--- Upper wall (j=Ny) ---!
-   j=Ny
-   do i=2,Nx-1
-    iPoint = i + (j-1)*Nx
-    P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
-    !P(i,j) = P(i,j-1)
-    !print*,i,j,i,j-1,P(i,j-1)
-   enddo
+   
    !print*,'----Next iteration----'
    !--- Convergence monitoring ---!
    
