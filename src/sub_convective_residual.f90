@@ -16,9 +16,25 @@ do i=1,Nx
        jPoint = i+1 + (j-1)*Nx
        U_e = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_e = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
+       FaceFlux = rho*U_e*dy
        if (upwind) then
-       F_e(1) = max(rho*U_e*dy,0.d0)*U_old(1,iPoint) + min(rho*U_e*dy,0.d0)*U_old(1,jPoint) ! (rho*U)*U|_e
-       F_e(2) = max(rho*U_e*dy,0.d0)*U_old(2,iPoint) + min(rho*U_e*dy,0.d0)*U_old(2,jPoint) ! (rho*V)*U|_e
+         if (FaceFlux .gt. 0.d0) then
+           U_up = U_old(1,iPoint)
+           V_up = U_old(2,iPoint)
+           if (muscl) then
+             U_up = U_up + GradU(1,1,i,j)*dx/2.0
+             V_up = V_up + GradU(2,1,i,j)*dx/2.0
+           endif
+         else
+           U_up = U_old(1,jPoint)
+           V_up = U_old(2,jPoint)
+           if (muscl) then
+             U_up = U_up + GradU(1,1,i+1,j)*dx/2.0
+             V_up = V_up + GradU(2,1,i+1,j)*dx/2.0
+           endif
+         endif
+       F_e(1) = FaceFlux*U_up ! (rho*U)*U|_e
+       F_e(2) = FaceFlux*V_up ! (rho*V)*U|_e
        else
        F_e(1) = rho*U_e*U_e*dy          ! (rho*U)*U|_e
        F_e(2) = rho*V_e*U_e*dy          ! (rho*V)*U|_e
@@ -61,11 +77,27 @@ do i=1,Nx
        U_w = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_w = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
-       F_w(1) = -max(rho*U_w*dy,0.d0)*U_old(1,jPoint) - min(rho*U_w*dy,0.d0)*U_old(1,iPoint) ! (rho*U)*U|_w
-       F_w(2) = -max(rho*U_w*dy,0.d0)*U_old(2,jPoint) - min(rho*U_w*dy,0.d0)*U_old(2,iPoint) ! (rho*V)*U|_w
+       FaceFlux = rho*U_w*dy
+       if (FaceFlux .gt. 0.d0) then
+          U_up = U_old(1,jPoint)
+          V_up = U_old(2,jPoint)
+          if (muscl) then
+             U_up = U_up + GradU(1,1,i-1,j)*dx/2.0
+             V_up = V_up + GradU(2,1,i-1,j)*dx/2.0
+          endif
        else
-       F_w(1) = -rho*U_w*U_w*dy          ! (rho*U)*U|_e
-       F_w(2) = -rho*V_w*U_w*dy          ! (rho*V)*U|_e
+          U_up = U_old(1,iPoint)
+          V_up = U_old(2,iPoint)
+          if (muscl) then
+             U_up = U_up + GradU(1,1,i,j)*dx/2.0
+             V_up = V_up + GradU(2,1,i,j)*dx/2.0
+          endif
+       endif
+       F_w(1) = -FaceFlux*U_up ! (rho*U)*U|_w
+       F_w(2) = -FaceFlux*V_up ! (rho*U)*V|_w
+       else
+       F_w(1) = -rho*U_w*U_w*dy          ! (rho*U)*U|_w
+       F_w(2) = -rho*V_w*U_w*dy          ! (rho*U)*V|_w
        endif
        lambda_i = abs(2.d0*U_old(1,iPoint)*dy)
        lambda_j = abs(2.d0*U_old(1,jPoint)*dy)
@@ -105,11 +137,27 @@ do i=1,Nx
        U_n = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_n = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
-       F_n(1) = max(rho*V_n*dx,0.d0)*U_old(1,iPoint) + min(rho*V_n*dx,0.d0)*U_old(1,jPoint) ! (rho*U)*V|_n
-       F_n(2) = max(rho*V_n*dx,0.d0)*U_old(2,iPoint) + min(rho*V_n*dx,0.d0)*U_old(2,jPoint) ! (rho*V)*V|_n
+       FaceFlux = rho*V_n*dx
+       if (FaceFlux .gt. 0.d0) then
+         U_up = U_old(1,iPoint)
+         V_up = U_old(2,iPoint)
+         if (muscl) then
+             U_up = U_up + GradU(1,2,i,j)*dy/2.0
+             V_up = V_up + GradU(2,2,i,j)*dy/2.0
+         endif
        else
-       F_n(1) = rho*V_n*U_n*dx          ! (rho*U)*U|_e
-       F_n(2) = rho*V_n*V_n*dx          ! (rho*V)*U|_e
+         U_up = U_old(1,jPoint)
+         V_up = U_old(2,jPoint)
+         if (muscl) then
+             U_up = U_up + GradU(1,2,i,j+1)*dy/2.0
+             V_up = V_up + GradU(2,2,i,j+1)*dy/2.0
+         endif
+       endif
+       F_n(1) = FaceFlux*U_up ! (rho*V)*U|_n
+       F_n(2) = FaceFlux*V_up ! (rho*V)*V|_n
+       else
+       F_n(1) = rho*V_n*U_n*dx          ! (rho*V)*U|_n
+       F_n(2) = rho*V_n*V_n*dx          ! (rho*V)*V|_n
        endif
        lambda_i = abs(2.d0*U_old(2,iPoint)*dx)
        lambda_j = abs(2.d0*U_old(2,jPoint)*dx)
@@ -149,11 +197,27 @@ do i=1,Nx
        U_s = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_s = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
-       F_s(1) = -max(rho*V_s*dx,0.d0)*U_old(1,jPoint) - min(rho*V_s*dx,0.d0)*U_old(1,iPoint) ! (rho*U)*V|_s
-       F_s(2) = -max(rho*V_s*dx,0.d0)*U_old(2,jPoint) - min(rho*V_s*dx,0.d0)*U_old(2,iPoint) ! (rho*V)*V|_s
+       FaceFlux = rho*V_s*dx
+       if (FaceFlux .gt. 0.d0) then
+         U_up = U_old(1,jPoint)
+         V_up = U_old(2,jPoint)
+         if (muscl) then
+             U_up = U_up + GradU(1,2,i,j-1)*dy/2.0
+             V_up = V_up + GradU(2,2,i,j-1)*dy/2.0
+         endif
        else
-       F_s(1) = -rho*V_s*U_s*dx          ! (rho*U)*U|_e
-       F_s(2) = -rho*V_s*V_s*dx          ! (rho*V)*U|_e
+         U_up = U_old(1,iPoint)
+         V_up = U_old(2,iPoint)
+         if (muscl) then
+             U_up = U_up + GradU(1,2,i,j)*dy/2.0
+             V_up = V_up + GradU(2,2,i,j)*dy/2.0
+         endif
+       endif
+       F_s(1) = -FaceFlux*U_up ! (rho*V)*U|_s
+       F_s(2) = -FaceFlux*V_up ! (rho*V)*V|_s
+       else
+       F_s(1) = -rho*V_s*U_s*dx          ! (rho*V)*U|_s
+       F_s(2) = -rho*V_s*V_s*dx          ! (rho*V)*V|_s
        endif
        lambda_i = abs(2.d0*U_old(2,iPoint)*dx)
        lambda_j = abs(2.d0*U_old(2,jPoint)*dx)

@@ -2,6 +2,7 @@
  wrt_data = 0
  implicit_time = .false.
  upwind = .true.
+ muscl = .true.
  nExtIter = 1000
  nMIter = 500
  nPIter = 500
