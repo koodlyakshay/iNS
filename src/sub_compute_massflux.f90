@@ -266,6 +266,6 @@ P_Correc = 0.d0
       mass_l2 = mass_l2 + Mass(iPoint)**2.0
    enddo
    mass_l2 = sqrt(mass_l2/nPoint)
-   print*,'Mass: ',mass_l2,ExtIter
+   if (modulo(ExtIter,p_out) .eq. 0) print*,'Mass: ',mass_l2,ExtIter
 
 end subroutine compute_massflux

@@ -54,7 +54,7 @@ do ExtIter = 1,nExtIter
        
    !--- Viscous terms ---!
     
-   call viscous_residual
+   !call viscous_residual
    
    !--- Source term (pressure only) ---!
    call pressure_residual
@@ -102,7 +102,7 @@ do ExtIter = 1,nExtIter
    j=1
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.0.d0) then
+   if (x(i,j).ge.10.d0) then
     !--- Zero velocity ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -123,7 +123,7 @@ do ExtIter = 1,nExtIter
    j=Ny
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.0.d0) then
+   if (x(i,j).ge.10.d0) then
     !--- Fixed wall ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -134,10 +134,10 @@ do ExtIter = 1,nExtIter
      Tot_Jac((iPoint-1)*nVar+2,:) = 0.0
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 1.0
      Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 1.0
-     else
+   else
      !--- Update residual ---!
      !Symmetry plane --> Add zero flux 
-    endif
+   endif
    enddo
    
    Res_l2 = 0.d0
@@ -188,14 +188,14 @@ do PIter = 1,nPIter
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
       jPoint = i + (j+1-1)*Nx
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !South
-      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
       jPoint = i + (j-1-1)*Nx
+      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -227,10 +227,11 @@ do PIter = 1,nPIter
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !South
-      !jPoint = i + (j-1-1)*Nx
-      !Jac(iPoint,jPoint) = 
+      jPoint = i + (j+1-1)*Nx !only to compute derivative
+      R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) +  
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    enddo
    
    !--- Upper wall (j=Ny) ---!
@@ -251,10 +252,11 @@ do PIter = 1,nPIter
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
-      !jPoint = i + (j+1-1)*Nx
-      !Jac(iPoint,jPoint) = 0.d0
+      jPoint = i + (j-1-1)*Nx !only to compute derivative
+      R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !South
       jPoint = i + (j-1-1)*Nx
       R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
@@ -497,11 +499,14 @@ do PIter = 1,nPIter
    !--- Right outlet (i=Nx) ---!
    i=Nx
    do j=1,Ny
+    F_n = 0.d0
+    F_s = 0.d0
+    F_e = 0.d0
+    F_w = 0.d0
     iPoint = i + (j-1)*Nx
     !P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     P(i,j) = P_outlet
     
-    !Should add vel here
     !East
     jPoint = i+1 + (j-1)*Nx
     F_e(1) = 0.0!0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
@@ -525,34 +530,34 @@ do PIter = 1,nPIter
    !--- Convergence monitoring ---!
    
    !--- Output solution ---!
-   if (modulo(ExtIter,1) .eq. 0) then
+   if (modulo(ExtIter,p_out) .eq. 0) then
    
-   open(unit=14,file='../out/Centerline_channel.txt',status='unknown')
+   open(unit=14,file='../out/euler/Centerline_channel.txt',status='unknown')
      i = (Nx+1)/2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
+       write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(14)
-    open(unit=24,file='../out/Start_channel.txt',status='unknown')
-     i = k+1
+    open(unit=24,file='../out/euler/Start_channel.txt',status='unknown')
+     i = 5
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
+       write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(24)
-    open(unit=34,file='../out/Outlet_channel.txt',status='unknown')
+    open(unit=34,file='../out/euler/Outlet_channel.txt',status='unknown')
      i = Nx
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(34)
-    open(unit=34,file='../out/Interior_channel.txt',status='unknown')
+    open(unit=34,file='../out/euler/Interior_channel.txt',status='unknown')
      i = Nx-5
      do j=1,Ny
        iPoint = i + (j-1)*Nx
-       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),iPoint,x(i,j)
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(34)
    endif

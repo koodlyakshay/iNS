@@ -2,10 +2,11 @@
  wrt_data = 0
  implicit_time = .false.
  upwind = .true.
- muscl = .true.
- nExtIter = 1000
- nMIter = 500
- nPIter = 500
+ muscl = .false.
+ nExtIter = 3800
+ nMIter = 10
+ nPIter = 10
  p_screen1 = 250
- p_screen2 = 250
+ p_screen2 = 50
+ p_out = 10
 /
