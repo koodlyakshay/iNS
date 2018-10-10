@@ -29,11 +29,13 @@ endif
 !--- Begin Solver ---!
 
 do ExtIter = 1,nExtIter
+
+!--- SU2 equivalent: Run()->CPBFludIteration()::Iterate() ---!
 !----------------------------------------------------------------------!
 !---------------------- Solve momentum equation -----------------------!
 !----------------------------------------------------------------------!
   do MIter = 1,nMIter
-   
+   !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
    !--- Set old variables, compute gradient ---!
    call preprocessing
       
@@ -43,7 +45,9 @@ do ExtIter = 1,nExtIter
    write(18,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
    endif
-   !--- Compute spatial discretization ---!
+   !--- No set time step as we use fixed time step given as input ---!
+   
+   !--- Compute spatial discretization (Space Integration) ---!
    
    !--- Convective terms (1st order upwind/Central) ---!
    call convective_residual
@@ -75,7 +79,25 @@ do ExtIter = 1,nExtIter
      Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.5*U(2,iPoint)
      Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + 0.5*U(1,iPoint)
    enddo
-   
+   !--- Left inlet (i=1) ---!
+   i=1
+   do j=1,Ny
+   iPoint = i + (j-1)*Nx
+    !--- Specified velocity ---!
+     U_old(1,iPoint) = 1.0
+     U_old(2,iPoint) = 0.0
+     
+     
+     !--- Update residual ---!
+     R(1:2,iPoint) = 0.0
+     
+     Tot_Jac((iPoint-1)*nVar+1,:) = 0.0
+     Tot_Jac((iPoint-1)*nVar+2,:) = 0.0
+     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 1.0
+     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 1.0
+   enddo   
+
+
    !--- Lower wall (j=1) ---!
    j=1
    do i=1,Nx
@@ -96,25 +118,7 @@ do ExtIter = 1,nExtIter
      !Symmetry plane --> Add zero flux 
    endif
    enddo
-   
-   !--- Left inlet (i=1) ---!
-   i=1
-   do j=1,Ny
-   iPoint = i + (j-1)*Nx
-    !--- Specified velocity ---!
-     U_old(1,iPoint) = 1.0
-     U_old(2,iPoint) = 0.0
-     
-     
-     !--- Update residual ---!
-     R(1:2,iPoint) = 0.0
-     
-     Tot_Jac((iPoint-1)*nVar+1,:) = 0.0
-     Tot_Jac((iPoint-1)*nVar+2,:) = 0.0
-     Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 1.0
-     Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 1.0
-   enddo
-   
+      
    !--- Upper wall (j=Ny) ---!
    j=Ny
    do i=1,Nx
@@ -150,23 +154,19 @@ do ExtIter = 1,nExtIter
    
 enddo   !MIter
 
-!--- Compute residual mass flux from vel solution ---!
+!--- Compute residual mass flux from vel solution (SetPoissonSource()) ---!
 call compute_massflux
 
-
+!--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(Poisson)
 !----------------------------------------------------------------------!
 !---------------- Solve Pressure correction equation now --------------!
 !----------------------------------------------------------------------!
-
-
-  
-
    Sol(3,:) = 0.d0
    P_Correc = 0.0
-do PIter = 1,nPIter   
+do PIter = 1,nPIter
 
    R(3,:) = 0.d0  
-   
+!--- Viscous Residual ---!
    !--- Assemble pressure equation ---!
    do i=2,Nx-1
     do j=2,Ny-1
@@ -233,6 +233,35 @@ do PIter = 1,nPIter
       !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) +  
    enddo
    
+   !--- Upper wall (j=Ny) ---!
+   j=Ny
+   do i=2,Nx-1
+    iPoint = i + (j-1)*Nx
+    Jac(iPoint,:) = 0.0
+      !East
+      jPoint = i+1 + (j-1)*Nx
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
+
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      !West
+      jPoint = i-1 + (j-1)*Nx
+      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
+      
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      !North
+      !jPoint = i + (j+1-1)*Nx
+      !Jac(iPoint,jPoint) = 0.d0
+      
+      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
+      !South
+      jPoint = i + (j-1-1)*Nx
+      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
+      
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+   enddo
    
    !--- Left inlet (i=1) ---!
    i=1
@@ -296,37 +325,6 @@ do PIter = 1,nPIter
       !Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*Area/dx)
       
       !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   enddo
-   
-   
-   !--- Upper wall (j=Ny) ---!
-   j=Ny
-   do i=2,Nx-1
-    iPoint = i + (j-1)*Nx
-    Jac(iPoint,:) = 0.0
-      !East
-      jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
-      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
-
-      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      !West
-      jPoint = i-1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
-      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
-      
-      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      !North
-      !jPoint = i + (j+1-1)*Nx
-      !Jac(iPoint,jPoint) = 0.d0
-      
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
-      !South
-      jPoint = i + (j-1-1)*Nx
-      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
-      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
-      
-      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    enddo
    
    i=1
@@ -402,10 +400,6 @@ do PIter = 1,nPIter
    Jac(iPoint,jPoint) = 0.0!0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
    
       Jac(iPoint,iPoint) = 1.0!Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   !Jac(iPoint,:) = 0.0
-   !R(3,iPoint) = 0.0
-   !Jac(iPoint,iPoint) = 1.0
-   !Mass(iPoint) = 0.0
    
    if (implicit_time) then
    
@@ -423,12 +417,10 @@ do PIter = 1,nPIter
 
    Res_l2 = sqrt(Res_l2/nPoint)
    if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',Res_l2,PIter,ExtIter
-   
-   
+      
    !--- Solve pressure correction equation ---!
    call seidel(0,nPoint,Jac(:,:),R(3,:),1.d0,Sol(3,:),Res(:),liniter,convergence)
    if (convergence .ne. 0) print*, 'Error in p',convergence,ExtIter
-   
    
    do iPoint = 1,nPoint
      P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
@@ -448,7 +440,7 @@ do PIter = 1,nPIter
    endif 
  enddo   !PIter
  
- 
+ !--- Correct_Velocity(), Correct_Pressure() ---!
  !--- Correct pressure and velocities ---!
    do i=2,Nx-1
     do j=2,Ny-1
@@ -477,7 +469,7 @@ do PIter = 1,nPIter
    !--- Apply BC ---!
    !--- Lower wall (j=1) ---!
    j=1
-   do i=1,Nx
+   do i=2,Nx-1
     iPoint = i + (j-1)*Nx
     P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     !P(i,j) = P(i,j+1)
@@ -495,16 +487,16 @@ do PIter = 1,nPIter
    
    !--- Left inlet (i=1) ---!
    i=1
-   do j=2,Ny
+   do j=1,Ny
     iPoint = i + (j-1)*Nx
     P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     !P(i,j) = P(i+1,j)
     !print*,i,j,i+1,j,P(i+1,j)
    enddo
-   !--- Move down perhaps ---!
+
    !--- Right outlet (i=Nx) ---!
    i=Nx
-   do j=2,Ny-1
+   do j=1,Ny
     iPoint = i + (j-1)*Nx
     !P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     P(i,j) = P_outlet
@@ -518,10 +510,10 @@ do PIter = 1,nPIter
     F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
     !North
     jPoint = i + (j+1-1)*Nx
-    F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    if (j.ne.Ny) F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     !South
     jPoint = i + (j-1-1)*Nx
-    F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    if (j.ne.1) F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
       
     U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
                                Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
@@ -529,9 +521,7 @@ do PIter = 1,nPIter
                                Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
     !print*,i,j,i-1,j,P(i-1,j)
    enddo
-   
-   
-   !print*,'----Next iteration----'
+
    !--- Convergence monitoring ---!
    
    !--- Output solution ---!

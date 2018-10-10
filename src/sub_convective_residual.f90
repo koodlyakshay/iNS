@@ -29,8 +29,8 @@ do i=1,Nx
            U_up = U_old(1,jPoint)
            V_up = U_old(2,jPoint)
            if (muscl) then
-             U_up = U_up + GradU(1,1,i+1,j)*dx/2.0
-             V_up = V_up + GradU(2,1,i+1,j)*dx/2.0
+             U_up = U_up - GradU(1,1,i+1,j)*dx/2.0
+             V_up = V_up - GradU(2,1,i+1,j)*dx/2.0
            endif
          endif
        F_e(1) = FaceFlux*U_up ! (rho*U)*U|_e
@@ -89,8 +89,8 @@ do i=1,Nx
           U_up = U_old(1,iPoint)
           V_up = U_old(2,iPoint)
           if (muscl) then
-             U_up = U_up + GradU(1,1,i,j)*dx/2.0
-             V_up = V_up + GradU(2,1,i,j)*dx/2.0
+             U_up = U_up - GradU(1,1,i,j)*dx/2.0
+             V_up = V_up - GradU(2,1,i,j)*dx/2.0
           endif
        endif
        F_w(1) = -FaceFlux*U_up ! (rho*U)*U|_w
@@ -149,8 +149,8 @@ do i=1,Nx
          U_up = U_old(1,jPoint)
          V_up = U_old(2,jPoint)
          if (muscl) then
-             U_up = U_up + GradU(1,2,i,j+1)*dy/2.0
-             V_up = V_up + GradU(2,2,i,j+1)*dy/2.0
+             U_up = U_up - GradU(1,2,i,j+1)*dy/2.0
+             V_up = V_up - GradU(2,2,i,j+1)*dy/2.0
          endif
        endif
        F_n(1) = FaceFlux*U_up ! (rho*V)*U|_n
@@ -209,8 +209,8 @@ do i=1,Nx
          U_up = U_old(1,iPoint)
          V_up = U_old(2,iPoint)
          if (muscl) then
-             U_up = U_up + GradU(1,2,i,j)*dy/2.0
-             V_up = V_up + GradU(2,2,i,j)*dy/2.0
+             U_up = U_up - GradU(1,2,i,j)*dy/2.0
+             V_up = V_up - GradU(2,2,i,j)*dy/2.0
          endif
        endif
        F_s(1) = -FaceFlux*U_up ! (rho*V)*U|_s
