@@ -54,7 +54,7 @@ do ExtIter = 1,nExtIter
        
    !--- Viscous terms ---!
     
-   !call viscous_residual
+   call viscous_residual
    
    !--- Source term (pressure only) ---!
    call pressure_residual
@@ -102,7 +102,7 @@ do ExtIter = 1,nExtIter
    j=1
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.10.d0) then
+   if (x(i,j).ge.-1.d0) then
     !--- Zero velocity ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -123,7 +123,7 @@ do ExtIter = 1,nExtIter
    j=Ny
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.10.d0) then
+   if (x(i,j).ge.-1.d0) then
     !--- Fixed wall ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -177,7 +177,7 @@ do PIter = 1,nPIter
       !--- where \underbar{D}_f is the inverse of momentum coefficient of the two points calculated at the face ---!
       !East
       jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(dy/dx)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -189,7 +189,7 @@ do PIter = 1,nPIter
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
       jPoint = i + (j+1-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -210,7 +210,7 @@ do PIter = 1,nPIter
     Jac(iPoint,:) = 0.0
       !East
       jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dy/dx)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -222,13 +222,13 @@ do PIter = 1,nPIter
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
       jPoint = i + (j+1-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !South
       jPoint = i + (j+1-1)*Nx !only to compute derivative
-      R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*(P_Correc(iPoint)-P_Correc(jPoint))*(dx/dy)
+      R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*(P_Correc(jPoint)-P_Correc(iPoint))*(dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -241,7 +241,7 @@ do PIter = 1,nPIter
     Jac(iPoint,:) = 0.0
       !East
       jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dy/dx)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -272,19 +272,19 @@ do PIter = 1,nPIter
     Jac(iPoint,:) = 0.0
       !East
       jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(dy/dx)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !West
-      jPoint = i+1 + (j-1)*Nx
-      R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      jPoint = i+1 + (j-1)*Nx!only to compute derivative
+      R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(dy/dx)
       Jac(iPoint,jPoint) = D(1,iPoint)*(dy/dx)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
       jPoint = i + (j+1-1)*Nx
-      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dx/dy)
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dx/dy)
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -305,28 +305,27 @@ do PIter = 1,nPIter
     Jac(iPoint,iPoint) = 1.0
     R(3,iPoint) = 0.d0
       !East
-      !jPoint = i+1 + (j-1)*Nx
-      !Jac(iPoint,jPoint) = 0.d0
-
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
+      jPoint = i-1 + (j-1)*Nx !only to compute derivative
+      R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      Jac(iPoint,jPoint) = D(1,iPoint)*(dy/dx)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
       !West
-      !jPoint = i-1 + (j-1)*Nx
-      !R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-      !Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
-      
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      jPoint = i-1 + (j-1)*Nx
+      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !North
-      !jPoint = i + (j+1-1)*Nx
-      !R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-      !Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*Area/dx)
+      jPoint = i + (j+1-1)*Nx
+      R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dx/dy)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dx/dy)
       
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       !South
-      !jPoint = i + (j-1-1)*Nx
-      !R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-      !Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*Area/dx)
+      jPoint = i + (j-1-1)*Nx
+      R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dx/dy)
+      Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dx/dy)
       
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    enddo
    
    i=1
@@ -334,18 +333,18 @@ do PIter = 1,nPIter
    iPoint = i + (j-1)*Nx
    !East
    jPoint = i+1 + (j-1)*Nx
-   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dy/dx)
    Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)   
    !North 
    jPoint = i + (j+1-1)*Nx
-   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dx/dy)
+   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dx/dy)
    Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dx/dy)
    
    !Inlet face(West)
    jPoint = i+1 + (j-1)*Nx !(only to compute derivative)
-   R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dx/dy)
+   R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dx/dy)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)  
 
@@ -354,7 +353,7 @@ do PIter = 1,nPIter
    iPoint = i + (j-1)*Nx
    !East
    jPoint = i+1 + (j-1)*Nx
-   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dy/dx)
    Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
@@ -366,7 +365,7 @@ do PIter = 1,nPIter
    
    !Inlet face(West)
    jPoint = i+1 + (j-1)*Nx !(only to compute derivative)
-   R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(0.5*dy/dx)
+   R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(jPoint)-P_Correc(iPoint))*(0.5*dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    
@@ -375,16 +374,22 @@ do PIter = 1,nPIter
    iPoint = i + (j-1)*Nx
    !West
    jPoint = i-1 + (j-1)*Nx
-   R(3,iPoint) = 0.0!R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-   Jac(iPoint,jPoint) = 0.0!0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
+   R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
+   Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
 
       !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    !South 
    jPoint = i + (j-1-1)*Nx
-   R(3,iPoint) = 0.0!R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-   Jac(iPoint,jPoint) = 0.0!0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
+   R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
+   Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
 
-      Jac(iPoint,iPoint) = 1.0!Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+   
+   !East
+      jPoint = i-1 + (j-1)*Nx !only to compute derivative
+      R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      Jac(iPoint,jPoint) = D(1,iPoint)*(dy/dx)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
    
     
    i=Nx
@@ -392,16 +397,20 @@ do PIter = 1,nPIter
    iPoint = i + (j-1)*Nx
    !West
    jPoint = i-1 + (j-1)*Nx
-   R(3,iPoint) = 0.0!R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-   Jac(iPoint,jPoint) = 0.0!0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
-
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+   R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
+   Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    !North 
    jPoint = i + (j+1-1)*Nx
-   R(3,iPoint) = 0.0!R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(iPoint)-P_Correc(jPoint))
-   Jac(iPoint,jPoint) = 0.0!0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
-   
-      Jac(iPoint,iPoint) = 1.0!Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+   R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(P_Correc(jPoint)-P_Correc(jPoint))
+   Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(Area/dx)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
+      
+   !East
+      jPoint = i-1 + (j-1)*Nx !only to compute derivative
+      R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*(P_Correc(iPoint)-P_Correc(jPoint))*(dy/dx)
+      Jac(iPoint,jPoint) = D(1,iPoint)*(dy/dx)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
    
    if (implicit_time) then
    
@@ -506,25 +515,25 @@ do PIter = 1,nPIter
     iPoint = i + (j-1)*Nx
     !P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     P(i,j) = P_outlet
-    
+    if ((j.ne.Ny) .or. (j.ne.1)) then
     !East
     jPoint = i+1 + (j-1)*Nx
-    F_e(1) = 0.0!0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+    F_e(1) = (P_Correc(iPoint))*dy
     !West
     jPoint = i-1 + (j-1)*Nx
     F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
     !North
     jPoint = i + (j+1-1)*Nx
-    if (j.ne.Ny) F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+     F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     !South
     jPoint = i + (j-1-1)*Nx
-    if (j.ne.1) F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
       
     U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
                                Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
     U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
                                Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-    !print*,i,j,i-1,j,P(i-1,j)
+    endif!print*,i,j,i-1,j,P(i-1,j)
    enddo
 
    !--- Convergence monitoring ---!
@@ -532,28 +541,28 @@ do PIter = 1,nPIter
    !--- Output solution ---!
    if (modulo(ExtIter,p_out) .eq. 0) then
    
-   open(unit=14,file='../out/euler/Centerline_channel.txt',status='unknown')
+   open(unit=14,file='../out/newmuscl/Centerline_channel.txt',status='unknown')
      i = (Nx+1)/2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(14)
-    open(unit=24,file='../out/euler/Start_channel.txt',status='unknown')
+    open(unit=24,file='../out/newmuscl/Start_channel.txt',status='unknown')
      i = 5
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(24)
-    open(unit=34,file='../out/euler/Outlet_channel.txt',status='unknown')
+    open(unit=34,file='../out/newmuscl/Outlet_channel.txt',status='unknown')
      i = Nx
      do j=1,Ny
        iPoint = i + (j-1)*Nx
        write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint),iPoint,x(i,j)
      enddo
     close(34)
-    open(unit=34,file='../out/euler/Interior_channel.txt',status='unknown')
+    open(unit=34,file='../out/newmuscl/Interior_channel.txt',status='unknown')
      i = Nx-5
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -564,7 +573,7 @@ do PIter = 1,nPIter
 enddo !ExtIter
 
 
-open(unit=13,file='../out/Solution_channel.txt',status='unknown')
+open(unit=13,file='../out/visc/Solution_channel.txt',status='unknown')
 do j = 1,Ny
  do i=1,Nx
   iPoint = i+(j-1)*Nx
