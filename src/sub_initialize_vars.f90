@@ -10,15 +10,43 @@ do i=1,Nx
  enddo
 enddo
 
+!First set everything to 0.5dx * 0.5 dy (the lowest)
+Vol(:) = 0.25*dx*dy
+!Change the interior points so only boundary points have the old value
+do i=2,Nx-1
+ do j=2,Ny-1
+   iPoint = i + (j-1)*Nx
+   Vol(iPoint) = dx*dy 
+ enddo
+enddo
+!Change boundary points not at the corner so only corner points have the lowest value 
+!and others have the correct value
+i=1
+do j=2,Ny-1
+ iPoint = i + (j-1)*Nx
+ Vol(iPoint) = 0.5*dx*dy 
+enddo
+i=Nx
+do j=2,Ny-1
+ iPoint = i + (j-1)*Nx
+ Vol(iPoint) = 0.5*dx*dy 
+enddo
+j=1
+do i=2,Nx-1
+ iPoint = i + (j-1)*Nx
+ Vol(iPoint) = 0.5*dx*dy 
+enddo
+j=Ny
+do i=2,Nx-1
+ iPoint = i + (j-1)*Nx
+ Vol(iPoint) = 0.5*dx*dy 
+enddo
+
 !--- Flow defintion ---!
 
-U_inf = 1.0
-P_inf = 0.0
 P_outlet = 0.0
-rho = 1.0
-Re_l = Ly
-mu = 1.d0/400.d0!0.798e-3
 Re = (Re_l*U_inf*rho)/mu
+
 artvisc = 4.0
 CFL = 0.1
 alfa = 0.9
@@ -42,12 +70,9 @@ do iPoint = 1,nPoint
 enddo
 
 
-open(unit=10,file='../out/Solver_details.txt',status='unknown')
-write(10,*)'Lambda_inv: ',lambda_inv
-write(10,*)'Lambda_visc: ',lambda_visc
+open(unit=10,file='../out/test/Solver_details.txt',status='unknown')
 write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
 write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
-write(10,*)'Vol: ',Vol
 write(10,*)'Re: ',Re
 write(10,*)'dx: ',dx
 write(10,*)'dy: ',dy

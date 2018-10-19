@@ -17,6 +17,7 @@ do i=1,Nx
        U_e = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_e = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        FaceFlux = rho*U_e*dy
+       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_e*dy/2.d0
        if (upwind) then
          if (FaceFlux .gt. 0.d0) then
            U_up = U_old(1,iPoint)
@@ -78,6 +79,7 @@ do i=1,Nx
        V_w = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*U_w*dy
+       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_w*dy/2.d0
        if (FaceFlux .gt. 0.d0) then
           U_up = U_old(1,jPoint)
           V_up = U_old(2,jPoint)
@@ -138,6 +140,7 @@ do i=1,Nx
        V_n = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*V_n*dx
+       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_n*dx/2.d0
        if (FaceFlux .gt. 0.d0) then
          U_up = U_old(1,iPoint)
          V_up = U_old(2,iPoint)
@@ -198,6 +201,7 @@ do i=1,Nx
        V_s = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*V_s*dx
+       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_s*dx/2.d0
        if (FaceFlux .gt. 0.d0) then
          U_up = U_old(1,jPoint)
          V_up = U_old(2,jPoint)
@@ -258,10 +262,10 @@ do i=1,Nx
        R(1:2,iPoint) = Fc(1:2,i,j)
        
        if (wrt_data .eq. 1) then
-       write(16,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx,U_e,V_e
-       write(16,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx,U_w,V_w
-       write(16,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx,U_n,V_n
-       write(16,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx,U_s,V_s
+       write(16,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx,U_e,V_e,x(i,j),y(i,j)
+       write(16,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx,U_w,V_w,x(i,j),y(i,j)
+       write(16,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx,U_n,V_n,x(i,j),y(i,j)
+       write(16,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx,U_s,V_s,x(i,j),y(i,j)
        write(16,*)
        endif
      enddo

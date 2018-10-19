@@ -6,8 +6,8 @@ do iPoint=1,nPoint
         Tot_R((iPoint-1)*nVar+1) = -R(1,iPoint)
         Tot_R((iPoint-1)*nVar+2) = -R(2,iPoint)
        
-        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + Vol/dt
-        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + Vol/dt 
+        Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + Vol(iPoint)/dt
+        Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + Vol(iPoint)/dt 
         
         Tot_Sol((iPoint-1)*nVar+1) = 0.0
         Tot_Sol((iPoint-1)*nVar+2) = 0.0

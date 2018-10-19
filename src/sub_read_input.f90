@@ -12,6 +12,7 @@ use global_vars
 open(unit=16,file='../inp/grid.inp',status='unknown')
 open(unit=17,file='../inp/solver.inp',status='unknown')
 open(unit=18,file='../inp/numerics.inp',status='unknown')
+open(unit=19,file='../inp/flow.inp',status='unknown')
 
 read(16,grid)
 
@@ -19,15 +20,17 @@ read(17,solver)
 
 read(18,numerics)
 
+read(19,flow)
+
 
 nPoint = Nx*Ny
 nDim = 2
 dx = Lx/(Nx-1)
 dy = Ly/(Ny-1)
-Vol = dx*dy
 nVar = nDim
 
 close(16)
 close(17)
 close(18)
+close(19)
 end subroutine read_input

@@ -30,8 +30,8 @@ subroutine pressure_residual
        F_s(2) = -0.5*(P(i,j) + P(i,j-1))*dx ! p*Area|_s
        !print*,iPoint,(i + (j-1-1)*Nx),F_s,'p'
     endif
-       R(1,iPoint) = R(1,iPoint) + GradU(3,1,i,j)*Vol!F_e(1) + F_w(1) + F_n(1) + F_s(1) ! p*Area|_e - p*Area|_w
-       R(2,iPoint) = R(2,iPoint) + GradU(3,2,i,j)*Vol!F_e(2) + F_w(2) + F_n(2) + F_s(2) ! p*Area|_n - p*Area|_s
+       R(1,iPoint) = R(1,iPoint) + GradU(3,1,i,j)*Vol(iPoint)!F_e(1) + F_w(1) + F_n(1) + F_s(1) ! p*Area|_e - p*Area|_w
+       R(2,iPoint) = R(2,iPoint) + GradU(3,2,i,j)*Vol(iPoint)!F_e(2) + F_w(2) + F_n(2) + F_s(2) ! p*Area|_n - p*Area|_s
        
        if (wrt_data .eq. 1) then
        write(18,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx
@@ -39,13 +39,6 @@ subroutine pressure_residual
        write(18,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx
        write(18,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx
        write(18,*)
-       endif
-       
-       if(wrt_data .eq. 1) then
-       write(20,*)iPoint
-       write(20,*)R(1,iPoint)
-       write(20,*)R(2,iPoint)
-       write(20,*)
        endif
  
     enddo
