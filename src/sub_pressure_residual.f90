@@ -34,11 +34,7 @@ subroutine pressure_residual
        R(2,iPoint) = R(2,iPoint) + GradU(3,2,i,j)*Vol(iPoint)!F_e(2) + F_w(2) + F_n(2) + F_s(2) ! p*Area|_n - p*Area|_s
        
        if (wrt_data .eq. 1) then
-       write(18,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx
-       write(18,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx
-       write(18,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx
-       write(18,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx
-       write(18,*)
+       write(18,*)x(i,j),y(i,j),GradU(3,1,i,j)*Vol(iPoint),GradU(3,1,i,j),GradU(3,2,i,j)*Vol(iPoint),GradU(3,2,i,j)
        endif
  
     enddo

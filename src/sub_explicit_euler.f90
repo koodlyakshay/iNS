@@ -13,12 +13,13 @@ Sol(1:2,:) = 0.0
         Res_l2 = Res_l2 + R(1,iPoint)**2.0
         D(1,iPoint) = Vol(iPoint)/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
         D(2,iPoint) = Vol(iPoint)/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-        
-        
      enddo
      Res_l2 = sqrt(Res_l2/nPoint)
      if (modulo(MIter,p_screen1) .eq. 0) print*,'Res: ',log10(Res_l2),MIter,ExtIter
-    
-    
-
+     
+!     i=Nx
+!     do j=1,Ny
+!       print*,y(i,j),R(1,i+(j-1)*Nx),R(2,i+(j-1)*Nx)
+!     enddo
+!     print*,
 end subroutine explicit_euler

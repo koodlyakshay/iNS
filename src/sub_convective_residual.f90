@@ -262,10 +262,10 @@ do i=1,Nx
        R(1:2,iPoint) = Fc(1:2,i,j)
        
        if (wrt_data .eq. 1) then
-       write(16,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx,U_e,V_e,x(i,j),y(i,j)
-       write(16,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx,U_w,V_w,x(i,j),y(i,j)
-       write(16,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx,U_n,V_n,x(i,j),y(i,j)
-       write(16,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx,U_s,V_s,x(i,j),y(i,j)
+       write(16,*)x(i,j),y(i,j),F_e(1:2),U_e,V_e
+       write(16,*)x(i,j),y(i,j),F_w(1:2),U_w,V_w
+       write(16,*)x(i,j),y(i,j),F_n(1:2),U_n,V_n
+       write(16,*)x(i,j),y(i,j),F_s(1:2),U_s,V_s
        write(16,*)
        endif
      enddo
