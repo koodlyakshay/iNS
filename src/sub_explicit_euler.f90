@@ -16,10 +16,12 @@ Sol(1:2,:) = 0.0
      enddo
      Res_l2 = sqrt(Res_l2/nPoint)
      if (modulo(MIter,p_screen1) .eq. 0) print*,'Res: ',log10(Res_l2),MIter,ExtIter
-     
-!     i=Nx
-!     do j=1,Ny
-!       print*,y(i,j),R(1,i+(j-1)*Nx),R(2,i+(j-1)*Nx)
-!     enddo
-!     print*,
+    if (wrt_data .eq. 1) then 
+    do i=1,Nx
+     do j=1,Ny
+       write(20,*)x(i,j),y(i,j),R(1,i+(j-1)*Nx),R(2,i+(j-1)*Nx)
+     enddo
+     write(20,*)
+    enddo
+    endif
 end subroutine explicit_euler

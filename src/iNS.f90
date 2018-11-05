@@ -25,13 +25,13 @@ call initialize_vars
 
 !--- Output Files ---!
 open(unit=20,file='../out/test/Mass.txt',status='unknown')
-open(unit=22,file='../out/test/Velcorr.txt',status='unknown')
+open(unit=22,file='../out/test/Velcorro2.txt',status='unknown')
 if (wrt_data .eq. 1) then
   open(unit=16,file='../out/test/Convbudgetspb.txt',status='unknown')
   open(unit=17,file='../out/test/Viscbudgetspb.txt',status='unknown')
   open(unit=18,file='../out/test/presbudgetspb.txt',status='unknown')
   open(unit=19,file='../out/test/Residuals.txt',status='unknown')
-  open(unit=20,file='../out/test/MassnoRC.txt',status='unknown')
+  open(unit=20,file='../out/test/Flowres.txt',status='unknown')
   open(unit=21,file='../out/test/Poissongradandres.txt',status='unknown')
   
 endif
@@ -44,7 +44,7 @@ do ExtIter = 1,nExtIter
 !----------------------------------------------------------------------!
 !---------------------- Solve momentum equation -----------------------!
 !----------------------------------------------------------------------!
-write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
+!write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
   do MIter = 1,nMIter
    !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
    !--- Set old variables, compute gradient ---!
@@ -65,7 +65,7 @@ write(20,*)'-------------------------------------------Iteration----------------
        
    !--- Viscous terms ---!
     
-   call viscous_residual
+   !call viscous_residual
    
    !--- Source term (pressure only) ---!
    call pressure_residual
@@ -123,7 +123,7 @@ write(20,*)'-------------------------------------------Iteration----------------
    j=1
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.0.d0) then
+   if (x(i,j).ge.10.d0) then
     !--- Zero velocity ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -144,7 +144,7 @@ write(20,*)'-------------------------------------------Iteration----------------
    j=Ny
    do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.0.d0) then
+   if (x(i,j).ge.10.d0) then
     !--- Fixed wall ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -184,6 +184,7 @@ call compute_massflux
 !----------------------------------------------------------------------!
    Sol(3,:) = 0.d0
    P_Correc = 0.0
+   GradPc = 0.0
 do PIter = 1,nPIter
 
 
@@ -192,8 +193,8 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
 
    R(3,:) = 0.d0  
    
-     
-   call compute_pcgradient
+     call compute_pcgradientgg
+   
    
 !--- Viscous Residual ---!
    !--- Assemble pressure equation ---!
@@ -227,7 +228,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       if (i .ne. 1) then
       jPoint = i-1 + (j-1)*Nx
       if ((j.eq.1).or.(j.eq.Ny)) then
-          R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(1,i,j) + GradPc(1,i-1,j)))*dy
+          R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(1,i,j) + GradPc(1,i-1,j)))*dy/2.0
       else
           R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(1,i,j) + GradPc(1,i-1,j)))*dy
       endif
@@ -265,7 +266,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       if (j.ne.1) then
       jPoint = i + (j-1-1)*Nx
       if ((i.eq.1).or.(i.eq.Nx)) then
-         R(3,iPoint) = R(3,iPoint) - 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(2,i,j) + GradPc(2,i,j+1)))*dx/2.0
+         R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(2,i,j) + GradPc(2,i,j-1)))*dx/2.0
       else
          R(3,iPoint) = R(3,iPoint) + 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(2,i,j) + GradPc(2,i,j-1)))*dx
       endif
@@ -286,7 +287,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    !--- Boundary elements ---!
    !--- Lower wall (j=1) ---!
    j=1
-   if(wrt_data .eq. 0) write(21,*)'Wall'
+   if(wrt_data .eq. 1) write(21,*)'Wall'
    do i=2,Nx-1
     iPoint = i + (j-1)*Nx
     Jac(iPoint,:) = 0.0
@@ -296,14 +297,14 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
       if(wrt_data .eq. 1) then
           write(21,*) x(i,j),y(i,j)
-          write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
+          write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
           write(21,*)
        endif
    enddo
    
    !--- Upper wall (j=Ny) ---!
    j=Ny
-   if(wrt_data .eq. 0) write(21,*)'Wall'
+   if(wrt_data .eq. 1) write(21,*)'Wall'
    do i=2,Nx-1
     iPoint = i + (j-1)*Nx
     Jac(iPoint,:) = 0.0
@@ -313,7 +314,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
      if(wrt_data .eq. 1) then
           write(21,*) x(i,j),y(i,j)
-          write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
+          write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
           write(21,*)
        endif
    enddo
@@ -345,7 +346,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
     if(wrt_data .eq. 1) then
       write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy
+      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy
       write(21,*)
     endif
    enddo
@@ -369,9 +370,9 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 0) then
+   if(wrt_data .eq. 1) then
       write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
+      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       write(21,*)
    endif
    
@@ -397,7 +398,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    if(wrt_data .eq. 1) then
       write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
+      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       write(21,*)
    endif    
    
@@ -422,7 +423,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    if(wrt_data .eq. 1) then
       write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
+      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       write(21,*)
    endif
    
@@ -437,7 +438,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
    if(wrt_data .eq. 1) then
       write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
+      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
       write(21,*)
    endif
    
@@ -447,7 +448,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
    if(wrt_data .eq. 1) then
      write(21,*) x(i,j),y(i,j)
-     write(21,*) GradPc(1,i,j),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
+     write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
      write(21,*)
    endif
    
@@ -489,15 +490,19 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
    endif 
    if (wrt_data .eq. 1) then 
-     do j=1,Ny
-      do i=1,Nx
+     do i=1,Nx
+      do j=1,Ny
         iPoint = i + (j-1)*Nx
-        write(19,*)x(i,j),y(i,j),R(3,iPoint),Mass(iPoint)!P(i,j),P_Correc(iPoint)
+        write(19,*)x(i,j),y(i,j),R(3,iPoint),Mass(iPoint),P_Correc(iPoint)
       enddo
       write(19,*)
      enddo
      
     endif
+    
+    if (Piter .eq. nPIter)call compute_pcgradientgg
+    
+    
  enddo   !PIter
   
  !--- Correct_Velocity(), Correct_Pressure() ---!
@@ -525,8 +530,9 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
                                Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
       
-      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
-                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+!      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
       
     enddo
     write(22,*)
@@ -550,12 +556,13 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
     jPoint = i + (j-1-1)*Nx
     F_s(1) = (P_Correc(iPoint))*dx
       
-!    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
-!                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
-!    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
-!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-!   write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+   !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
 !                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
    enddo
    write(22,*)
    !--- Upper wall (j=Ny) ---!
@@ -577,12 +584,13 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
     jPoint = i + (j-1-1)*Nx
     F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
       
-!    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
-!                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
-!    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
-!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-!   write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+  !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
 !                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
    enddo
    write(22,*)
    !--- Left inlet (i=1) ---!
@@ -610,7 +618,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
 !!                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
 !!    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
 !!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-    write(22,*) x(i,j),y(i,j),0.0,0.0,1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+    write(22,*) x(i,j),y(i,j),0.0,0.0,D(1,iPoint)
     enddo
    write(22,*)
    !--- Right outlet (i=Nx) ---!
@@ -651,8 +659,9 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
                                Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
     U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
                                Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
-    write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
-                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+    !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
    enddo
    write(22,*)
    !--- Convergence monitoring ---!
@@ -660,7 +669,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    !--- Output solution ---!
    if (modulo(ExtIter,p_out) .eq. 0) then
    
-   open(unit=14,file='../out/test/Centerline_channel_V.txt',status='unknown')
+   open(unit=14,file='../out/test/Centerline_channel.txt',status='unknown')
      i = (Nx+1)/2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -669,7 +678,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
        !write(14,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
      enddo
     close(14)
-    open(unit=24,file='../out/test/Start_channel_V.txt',status='unknown')
+    open(unit=24,file='../out/test/Start_channel.txt',status='unknown')
      i = 2
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -678,7 +687,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
        !write(24,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
      enddo
     close(24)
-    open(unit=34,file='../out/test/Outlet_channel_V.txt',status='unknown')
+    open(unit=34,file='../out/test/Outlet_channel.txt',status='unknown')
      i = Nx
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -687,7 +696,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
        !write(34,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
      enddo
     close(34)
-    open(unit=34,file='../out/test/Interior_channel_V.txt',status='unknown')
+    open(unit=34,file='../out/test/Interior_channel.txt',status='unknown')
      i = Nx-1
      do j=1,Ny
        iPoint = i + (j-1)*Nx
@@ -700,7 +709,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
 enddo !ExtIter
 
 
-open(unit=13,file='../out/test/Solution_channel_V.txt',status='unknown')
+open(unit=13,file='../out/test/Solution_channel.txt',status='unknown')
 do j = 1,Ny
  do i=1,Nx
   iPoint = i+(j-1)*Nx

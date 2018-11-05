@@ -43,7 +43,7 @@ do i=2,Nx-1
 enddo
 
 !--- Flow defintion ---!
-
+Re_l = 0.25
 P_outlet = 0.0
 Re = (Re_l*U_inf*rho)/mu
 
@@ -80,6 +80,10 @@ write(10,*)'rho: ',rho
 write(10,*)'xmin: ',xmin
 write(10,*)'xmax: ',x(Nx,Ny)
 write(10,*)'kappa: ',kappa
+write(10,*)'U_inf: ',U_inf
+write(10,*)'mu: ',mu
+write(10,*)'Re_l: ',Re_l
+write(10,*)'P_inf: ',P_inf
 close(10)
 
 

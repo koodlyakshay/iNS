@@ -1,6 +1,6 @@
 &numerics
  Param_p = 0.3
  kappa = 0.0e-0
- dt_m = 5e-4
- dt_p = 5e-4
+ dt_m = 2.5e-3
+ dt_p = 2.5e-3
 /

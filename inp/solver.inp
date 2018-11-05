@@ -1,12 +1,12 @@
 &solver 
- wrt_data = 0
+ wrt_data = 1
  implicit_time = .false.
  upwind = .true.
- muscl = .true.
- nExtIter = 50000
+ muscl = .false.
+ nExtIter = 50
  nMIter = 10
  nPIter = 10
  p_screen1 = 100
  p_screen2 = 100
- p_out = 5000
+ p_out = 25
 /
