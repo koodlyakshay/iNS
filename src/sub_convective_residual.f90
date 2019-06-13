@@ -260,14 +260,7 @@ do i=1,Nx
        Fc(2,i,j) = F_e(2) + F_w(2) + F_n(2) + F_s(2) ! (rho*V)*U|_e - (rho*V)*U|_w + (rho*V)*V|_n - (rho*V)*V|_s
        
        R(1:2,iPoint) = Fc(1:2,i,j)
-       
-       if (wrt_data .eq. 1) then
-       write(16,*)x(i,j),y(i,j),F_e(1:2),U_e,V_e
-       write(16,*)x(i,j),y(i,j),F_w(1:2),U_w,V_w
-       write(16,*)x(i,j),y(i,j),F_n(1:2),U_n,V_n
-       write(16,*)x(i,j),y(i,j),F_s(1:2),U_s,V_s
-       write(16,*)
-       endif
+
      enddo
    enddo
 

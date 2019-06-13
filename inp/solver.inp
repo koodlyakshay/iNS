@@ -1,5 +1,4 @@
 &solver 
- wrt_data = 1
  implicit_time = .false.
  upwind = .true.
  muscl = .false.

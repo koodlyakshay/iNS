@@ -10,7 +10,7 @@
 !!		Residual, R_i(U) = \Sigma_{j\in N(i)} (F_{c_{ij}} - F_{v_{ij}})\Delta S_{ij} - Q_i|\Omega_i|
 !!		Jacobian, J_{ij} = \frac{\partial R_i(U^n)}{\partial U_j}
 !! \author Akshay KR
-!! \version 0.1 "Phoenix"
+!! \version 0.1 
 program iNS
 
 use global_vars
@@ -26,16 +26,7 @@ call initialize_vars
 !--- Output Files ---!
 open(unit=20,file='../out/test/Mass.txt',status='unknown')
 open(unit=22,file='../out/test/Velcorro2.txt',status='unknown')
-if (wrt_data .eq. 1) then
-  open(unit=16,file='../out/test/Convbudgetspb.txt',status='unknown')
-  open(unit=17,file='../out/test/Viscbudgetspb.txt',status='unknown')
-  open(unit=18,file='../out/test/presbudgetspb.txt',status='unknown')
-  open(unit=19,file='../out/test/Residuals.txt',status='unknown')
-  open(unit=20,file='../out/test/Flowres.txt',status='unknown')
-  open(unit=21,file='../out/test/Poissongradandres.txt',status='unknown')
-  
-endif
-open(unit=21,file='../out/test/Poissongradwall.txt',status='unknown')
+
 !--- Begin Solver ---!
 
 do ExtIter = 1,nExtIter
@@ -50,12 +41,6 @@ do ExtIter = 1,nExtIter
    !--- Set old variables, compute gradient ---!
    call preprocessing
       
-   if (wrt_data .eq. 1) then
-   write(16,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
-   write(17,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
-   write(18,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
-   write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
-   endif
    !--- No set time step as we use fixed time step given as input ---!
    
    !--- Compute spatial discretization (Space Integration) ---!
@@ -187,10 +172,6 @@ call compute_massflux
    GradPc = 0.0
 do PIter = 1,nPIter
 
-
-if (wrt_data .eq. 1)write(19,*)'------------------------------------Iteration---------------------------------------',PIter,ExtIter
-if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---------------------------------------',PIter,ExtIter
-
    R(3,:) = 0.d0  
    
      call compute_pcgradientgg
@@ -216,13 +197,6 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dy/dx)
 
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) x(i+1,j),y(i+1,j)
-          write(21,*) (0.5*(GradPc(1,i,j) + GradPc(1,i+1,j))),(0.5*(GradPc(2,i+1,j) + GradPc(2,i,j)))
-          write(21,*) -0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(1,i,j) + GradPc(1,i+1,j)))*dy
-          write(21,*)
-       endif
        endif
       !West
       if (i .ne. 1) then
@@ -235,14 +209,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dy/dx)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) x(i-1,j),y(i-1,j)
-          write(21,*) (0.5*(GradPc(1,i,j) + GradPc(1,i-1,j))),(0.5*(GradPc(2,i,j) + GradPc(2,i-1,j)))
-          write(21,*) 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(1,i,j) + GradPc(1,i-1,j)))*dy
-          write(21,*)
-       endif
-       endif
+      endif
       !North
       if (j.ne.Ny) then
       jPoint = i + (j+1-1)*Nx
@@ -254,14 +221,7 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) x(i,j+1),y(i,j+1)
-          write(21,*) (0.5*(GradPc(1,i,j) + GradPc(1,i,j+1))),(0.5*(GradPc(2,i,j) + GradPc(2,i,j+1)))
-          write(21,*) -0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(2,i,j) + GradPc(2,i,j+1)))*dx
-          write(21,*)
-       endif
-       endif
+      endif
       !South
       if (j.ne.1) then
       jPoint = i + (j-1-1)*Nx
@@ -273,21 +233,13 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       Jac(iPoint,jPoint) = 0.5*(D(1,iPoint)+D(1,jPoint))*(dx/dy)
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) x(i,j-1),y(i,j-1)
-          write(21,*) (0.5*(GradPc(1,i,j) + GradPc(1,i,j-1))),(0.5*(GradPc(2,i,j) + GradPc(2,i,j-1)))
-          write(21,*) 0.5*(D(1,iPoint)+D(1,jPoint))*(0.5*(GradPc(2,i,j) + GradPc(2,i,j-1)))*dx
-          write(21,*)
-       endif
-       endif
+      endif
     enddo
    enddo
    
    !--- Boundary elements ---!
    !--- Lower wall (j=1) ---!
    j=1
-   if(wrt_data .eq. 1) write(21,*)'Wall'
    do i=2,Nx-1
     iPoint = i + (j-1)*Nx
     Jac(iPoint,:) = 0.0
@@ -295,16 +247,11 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
       R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx
       
       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-      if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
-          write(21,*)
-       endif
+
    enddo
    
    !--- Upper wall (j=Ny) ---!
    j=Ny
-   if(wrt_data .eq. 1) write(21,*)'Wall'
    do i=2,Nx-1
     iPoint = i + (j-1)*Nx
     Jac(iPoint,:) = 0.0
@@ -312,47 +259,32 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
      R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx
      
      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-     if(wrt_data .eq. 1) then
-          write(21,*) x(i,j),y(i,j)
-          write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx
-          write(21,*)
-       endif
+
    enddo
    
    !--- Left inlet (i=1) ---!
    i=1
-   if(wrt_data .eq. 1) write(21,*)'Inlet'
    do j=2,Ny-1
     iPoint = i + (j-1)*Nx
     Jac(iPoint,:) = 0.0
     !West
     R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy
     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-    if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy
-      write(21,*)
-    endif
+
    enddo
    
    
    !--- Right outlet (i=Nx) ---!
    i=Nx
-   if(wrt_data .eq. 1) write(21,*)'Outlet'
    do j=2,Ny-1
     iPoint = i + (j-1)*Nx
     !East
     R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy
     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
-    if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy
-      write(21,*)
-    endif
+
    enddo
    
    
-   if(wrt_data .eq. 1) write(21,*)'Corners'
    i=1
    j=1
    iPoint = i + (j-1)*Nx
@@ -361,21 +293,11 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)  
-   if(wrt_data .eq. 1) then
-     write(21,*) x(i,j),y(i,j)
-     write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
-     write(21,*)
-   endif
+
    
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-      write(21,*)
-   endif
-   
    
 
    i=1
@@ -386,23 +308,12 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-     write(21,*) x(i,j),y(i,j)
-     write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
-     write(21,*)
-   endif
-       
+          
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-      write(21,*)
-   endif    
-   
-   
+      
    i=Nx
    j=Ny
    iPoint = i + (j-1)*Nx
@@ -411,22 +322,12 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-     write(21,*) x(i,j),y(i,j)
-     write(21,*) GradPc(1,i,j),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
-     write(21,*)
-   endif
-   
+      
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
    
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-      write(21,*)
-   endif
-   
+      
     
    i=Nx
    j=1
@@ -436,22 +337,12 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) - Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-      write(21,*) x(i,j),y(i,j)
-      write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),(D(1,iPoint))*GradPc(1,i,j)*dy/2.0
-      write(21,*)
-   endif
-   
+      
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
          
    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Jac(iPoint,jPoint)
-   if(wrt_data .eq. 1) then
-     write(21,*) x(i,j),y(i,j)
-     write(21,*) GradPc(1,i,j),D(1,iPoint),GradPc(2,i,j),D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-     write(21,*)
-   endif
-   
+      
    if (implicit_time) then
    
    mass_l2 = 0.d0
@@ -489,18 +380,8 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
      Res_l2 = sqrt(Res_l2/nPoint)
    if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
    endif 
-   if (wrt_data .eq. 1) then 
-     do i=1,Nx
-      do j=1,Ny
-        iPoint = i + (j-1)*Nx
-        write(19,*)x(i,j),y(i,j),R(3,iPoint),Mass(iPoint),P_Correc(iPoint)
-      enddo
-      write(19,*)
-     enddo
-     
-    endif
-    
-    if (Piter .eq. nPIter)call compute_pcgradientgg
+   
+   if (Piter .eq. nPIter)call compute_pcgradientgg
     
     
  enddo   !PIter
@@ -705,6 +586,8 @@ if (wrt_data .eq. 1)write(21,*)'------------------------------------Iteration---
        !write(34,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
      enddo
     close(34)
+    
+    call sub_output
    endif
 enddo !ExtIter
 
@@ -720,12 +603,6 @@ enddo
 
 close(11)
 close(12)
-if (wrt_data .eq. 1) then
-close(16)
-close(17)
-close(18)
-close(19)
-endif
 close(22)
 end program iNS
 

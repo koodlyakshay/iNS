@@ -80,17 +80,7 @@ use global_vars
    GradPc(1,i,j) = (1.5*P_Correc(i + (j-1)*Nx) - 2.0*P_Correc(i-1 + (j-1)*Nx) + 0.5*P_Correc(i-2 + (j-1)*Nx))/dx
 !   GradPc(2,i,j) = (P_correc(i + (j+1-1)*Nx) - P_correc(i + (j-1)*Nx))/dy
    GradPc(2,i,j) = (-1.5*P_Correc(i + (j-1)*Nx) + 2.0*P_Correc(i + (j-1+1)*Nx) - 0.5*P_Correc(i + (j-1+2)*Nx))/dy
-   
-   if (wrt_data .eq. 1) then
-   open(unit=100,file='../out/test/pcgradients.txt',status='unknown')
-   write(100,*)'------------------------------------Iteration---------------------------------------',PIter,ExtIter
-   do i=1,Nx
-    do j=1,Ny
-       write(100,*) x(i,j),y(i,j),GradPc(1,i,j),GradPc(2,i,j)
-    enddo
-    write(100,*)
-   enddo
-   endif
+
 end subroutine compute_pcgradient
 
 subroutine compute_pcgradientgg
@@ -243,16 +233,5 @@ enddo
      GradPc(2,i,j) = GradPc(2,i,j)/Vol(iPoint)
     enddo
    enddo
-   
-   if (wrt_data .eq. 1) then
-   open(unit=100,file='../out/test/pcgradientsgg.txt',status='unknown')
-   write(100,*)'------------------------------------Iteration---------------------------------------',PIter,ExtIter
-   do i=1,Nx
-    do j=1,Ny
-       write(100,*) x(i,j),y(i,j),GradPc(1,i,j),GradPc(2,i,j)
-    enddo
-    write(100,*)
-   enddo
-   endif
 
 end subroutine compute_pcgradientgg
