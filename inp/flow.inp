@@ -1,0 +1,7 @@
+&flow 
+ U_inf = 1.0
+ rho = 1.0
+ mu = 2.5e-3
+ Re_l = 0.25
+ P_inf = 0.0
+/
