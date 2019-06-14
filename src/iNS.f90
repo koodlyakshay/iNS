@@ -1,6 +1,6 @@
 
 !> \file iNS.f90
-!! \brief Program to solve channel flow using SIMPLE
+!! \brief Program to solve channel flow using SIMPLE \f$\alfa \f$
 !!		Implementation based on SU2 
 !!		Governing Eqn:
 !       \f$ \partial_t U + \nabla F_c - \nabla F_v = Q \f$
@@ -11,18 +11,6 @@
 !!		Jacobian, J_{ij} = \frac{\partial R_i(U^n)}{\partial U_j}
 !! \author Akshay KR
 !! \version 0.1 
-
-!---------------------------------------------------------------------------------------
-!To do list
-!1. Add velocity correction array and write it to output file.
-!2. Make subroutine for boundary conditions.
-!3. Make seperate subroutines for momentum and pressure correction eqn, can remain in this file only.
-!4. Add some logicals to clarify the physics, ex - viscous(to check  if euler/NS).
-!5. Change sizes in allocate vars to accommodate 3d if necessary.
-!6. Create functions like SetTotJacZero, AddJac, SubtractJac etc and pass the necessary 
-!   value and indicies to the function instead of existing code.
-!---------------------------------------------------------------------------------------
-
 program iNS
 
 use global_vars
@@ -61,6 +49,10 @@ implicit none
   endif
   open(unit=21,file='../out/test/Poissongradwall.txt',status='unknown')
 
+!--- Output Files ---!
+open(unit=20,file='../out/test/Mass.txt',status='unknown')
+open(unit=22,file='../out/test/Velcorro2.txt',status='unknown')
+
 !--- Begin Solver ---!
 
 do ExtIter = 1,nExtIter
@@ -69,6 +61,7 @@ do ExtIter = 1,nExtIter
 !----------------------------------------------------------------------!
 !---------------------- Solve momentum equation -----------------------!
 !----------------------------------------------------------------------!
+!write(20,*)'-------------------------------------------Iteration-------------------------------------------------',ExtIter
   do MIter = 1,nMIter
    !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
    !--- Set old variables, compute gradient ---!
@@ -83,7 +76,7 @@ do ExtIter = 1,nExtIter
        
    !--- Viscous terms ---!
     
-   call viscous_residual
+   !call viscous_residual
    
    !--- Source term (pressure only) ---!
    call pressure_residual
@@ -97,16 +90,20 @@ do ExtIter = 1,nExtIter
    do j=1,Ny
    iPoint = i + (j-1)*Nx
     !--- Velocity gradient is zero ---!
-    !--- Have to add convective flux as is ---!     
+    !--- Have to add convective flux as is ---!
+    ! U_old(1:2,iPoint) = 0.0
+     
      !--- Update residual ---!
      if ((j.eq.1) .or. (j.eq.Ny)) then
         R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy/2.d0,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
         R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy/2.d0,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)  
-       
+       ! print*,x(i,j),y(i,j),rho*U_old(1,iPoint)*dy/2.d0
+       ! print*,(rho*U_old(1,iPoint)*dy/2.d0)*U(1,iPoint),U(2,iPoint)
      else
         R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
         R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)
-        
+        !print*,x(i,j),y(i,j),rho*U_old(1,iPoint)*dy
+        !print*,(rho*U_old(1,iPoint)*dy)*U(1,iPoint),U(2,iPoint)
      endif
      
      Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
@@ -417,23 +414,222 @@ do PIter = 1,nPIter
   
  !--- Correct_Velocity(), Correct_Pressure() ---!
  !--- Correct pressure and velocities ---!
-  
- call sub_flow_correction
-  
 
+   do i=2,Nx-1
+    do j=2,Ny-1
+      iPoint = i + (j-1)*Nx
+      P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+      !East
+      jPoint = i+1 + (j-1)*Nx
+      F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+      !West
+      jPoint = i-1 + (j-1)*Nx
+      F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+      !North
+      jPoint = i + (j+1-1)*Nx
+      F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+      !South
+      jPoint = i + (j-1-1)*Nx
+      F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+      
+      U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+      U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+      
+!      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
+      
+    enddo
+    write(22,*)
+   enddo
+   !--- Apply BC ---!
+   !--- Lower wall (j=1) ---!
+   j=1
+   do i=2,Nx-1
+    iPoint = i + (j-1)*Nx
+    P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+    !East
+    jPoint = i+1 + (j-1)*Nx
+    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    !West
+    jPoint = i-1 + (j-1)*Nx
+    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    !North
+    jPoint = i + (j+1-1)*Nx
+     F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+    !South
+    jPoint = i + (j-1-1)*Nx
+    F_s(1) = (P_Correc(iPoint))*dx
+      
+    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+   !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
+   enddo
+   write(22,*)
+   !--- Upper wall (j=Ny) ---!
+   j=Ny
+   do i=2,Nx-1
+    iPoint = i + (j-1)*Nx
+    P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+
+    !East
+    jPoint = i+1 + (j-1)*Nx
+    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    !West
+    jPoint = i-1 + (j-1)*Nx
+    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    !North
+    jPoint = i + (j+1-1)*Nx
+    F_n(1) = (P_Correc(iPoint))*dx
+    !South
+    jPoint = i + (j-1-1)*Nx
+    F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+      
+    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+  !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
+   enddo
+   write(22,*)
+   !--- Left inlet (i=1) ---!
+   i=1
+   do j=1,Ny
+    iPoint = i + (j-1)*Nx
+    P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+   
+    !East
+    jPoint = i+1 + (j-1)*Nx
+    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.d0
+    !West
+    jPoint = i-1 + (j-1)*Nx
+    F_w(1) = P_Correc(iPoint)*dy
+    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.d0
+    !North
+    jPoint = i + (j+1-1)*Nx
+     F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    !South
+    jPoint = i + (j-1-1)*Nx
+    F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+      
+!!    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+!!                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+!!    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+!!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+    write(22,*) x(i,j),y(i,j),0.0,0.0,D(1,iPoint)
+    enddo
+   write(22,*)
+   !--- Right outlet (i=Nx) ---!
+   i=Nx
+   do j=1,Ny
+    F_n = 0.d0
+    F_s = 0.d0
+    F_e = 0.d0
+    F_w = 0.d0
+    iPoint = i + (j-1)*Nx
+    !P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
+    P(i,j) = P_outlet
+    !if ((j.ne.Ny) .or. (j.ne.1)) then
+    !East
+    jPoint = i+1 + (j-1)*Nx
+    F_e(1) = (P_Correc(iPoint))*dy
+    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.d0
+    !West
+    jPoint = i-1 + (j-1)*Nx
+    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy    
+    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.d0
+    !North
+    jPoint = i + (j+1-1)*Nx
+    if (j.ne.Ny) then
+      F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    else 
+      F_n(1) = (P_Correc(iPoint))*dx/2.d0
+    endif
+    !South
+    jPoint = i + (j-1-1)*Nx
+    if (j.ne.1) then
+      F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    else 
+      F_s(1) = (P_Correc(iPoint))*dx/2.d0
+    endif
+      
+    U(1,iPoint) = U(1,iPoint) - (F_e(1) - F_w(1))/&
+                               Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1)
+    U(2,iPoint) = U(2,iPoint) - (F_n(1) - F_s(1))/&
+                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+    !      write(22,*) x(i,j),y(i,j),(F_e(1) - F_w(1))/Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1),(F_n(1) - F_s(1))/&
+!                               Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2),1.0/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
+       write(22,*) x(i,j),y(i,j),D(1,iPoint)*GradPc(1,i,j),D(1,iPoint)*GradPc(2,i,j),D(1,iPoint)
+   enddo
+   write(22,*)
    !--- Convergence monitoring ---!
    
    !--- Output solution ---!
    if (modulo(ExtIter,p_out) .eq. 0) then
-     call sub_output
+   
+   open(unit=14,file='../out/test/Centerline_channel.txt',status='unknown')
+     i = (Nx+1)/2
+     do j=1,Ny
+       iPoint = i + (j-1)*Nx
+       jPoint = i + (Ny-1)*Nx
+       write(14,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+       !write(14,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+     enddo
+    close(14)
+    open(unit=24,file='../out/test/Start_channel.txt',status='unknown')
+     i = 2
+     do j=1,Ny
+       iPoint = i + (j-1)*Nx
+       jPoint = i + (Ny-1)*Nx
+       write(24,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+       !write(24,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+     enddo
+    close(24)
+    open(unit=34,file='../out/test/Outlet_channel.txt',status='unknown')
+     i = Nx
+     do j=1,Ny
+       iPoint = i + (j-1)*Nx
+       jPoint = i + (Ny-1)*Nx
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+       !write(34,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+     enddo
+    close(34)
+    open(unit=34,file='../out/test/Interior_channel.txt',status='unknown')
+     i = Nx-1
+     do j=1,Ny
+       iPoint = i + (j-1)*Nx
+       jPoint = i + (Ny-1)*Nx
+       write(34,*) y(i,j),U(1,iPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+       !write(34,*) y(i,j),y(i,j)*sqrt(U(1,iPoint)/(mu*x(i,j))),U(1,iPoint),U(1,iPoint)/U(1,jPoint),U(2,iPoint),P(i,j),Mass(iPoint)
+     enddo
+    close(34)
+    
+    call sub_output
    endif
 enddo !ExtIter
 
-call sub_output
+
+open(unit=13,file='../out/test/Solution_channel.txt',status='unknown')
+do j = 1,Ny
+ do i=1,Nx
+  iPoint = i+(j-1)*Nx
+  write(13,*) x(i,j),y(i,j),U(1,iPoint),U(2,iPoint),P_Correc(iPoint),P(i,j),Mass(iPoint)
+ enddo
+ write(13,*)
+enddo
 
 close(11)
 close(12)
-
+close(22)
 end program iNS
 
 

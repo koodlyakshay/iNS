@@ -1,5 +1,2 @@
-doc/
-out/
-src/*.o
-src/*.mod
-src/iNS
+doc
+out

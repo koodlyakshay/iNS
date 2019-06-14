@@ -2,14 +2,6 @@ subroutine initialize_vars
 
 use global_vars
 
-logical           :: old
-
-inquire(file = '../out/',exist=old)
-
-if (.not. old) then
-  call system('mkdir ../out/')
-endif  
-
 do i=1,Nx
  do j=1,Ny
     x(i,j) = xmin + (i-1)*dx
@@ -78,7 +70,7 @@ do iPoint = 1,nPoint
 enddo
 
 
-open(unit=10,file='../out/Solver_details.txt',status='unknown')
+open(unit=10,file='../out/test/Solver_details.txt',status='unknown')
 write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
 write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
 write(10,*)'Re: ',Re

@@ -299,7 +299,9 @@ P_Correc = 0.d0
      do j=1,Ny
       iPoint = i+ (j-1)*Nx
       mass_l2 = mass_l2 + Mass(iPoint)**2.0
+!      write(20,*) x(i,j),y(i,j),Mass(iPoint)
      enddo
+!     write(20,*)
    enddo
    
    mass_l2 = sqrt(mass_l2/nPoint)
