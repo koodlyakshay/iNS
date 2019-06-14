@@ -2,11 +2,18 @@ subroutine sub_output
 
 use global_vars
 
-real              :: tmp(165)
+real*8            :: dummy
 character         :: fmt1(30),fmt2
+logical           :: old
 
-open(unit=100,file='../out/test/flow.vtk',status='unknown')
-tmp = 1.0
+inquire(file = '../out/',exist=old)
+
+if (.not. old) then
+  call system('mkdir ../out/')
+endif  
+
+open(unit=100,file='../out/flow.vtk',status='unknown')
+dummy = 0.0
 
 !--- These three lines are compulsory. ---!
 write(100,'(a)')'# vtk DataFile Version 3.0'   ! File version and identifier
@@ -34,7 +41,36 @@ write(100,'(a)') 'LOOKUP_TABLE default'
 do j=1,Ny
  do i=1,Nx
   iPoint = i + (j-1)*Nx
-  write(100,'(F6.2)') P(i,j)
+  write(100,'(F8.6)') P(i,j)
+ enddo
+enddo
+
+write(100,'(a)') 'SCALARS Mass double 1'
+write(100,'(a)') 'LOOKUP_TABLE default'
+
+do j=1,Ny
+ do i=1,Nx
+  iPoint = i + (j-1)*Nx
+  write(100,'(F8.6)') Mass(iPoint)
+ enddo
+enddo
+
+write(100,'(a)') 'VECTORS Velocity double'
+
+do j=1,Ny
+ do i=1,Nx
+  iPoint = i + (j-1)*Nx
+  write(100,'(F8.6,A,F8.6,A,F8.6)') U(1,iPoint),achar(9),U(2,iPoint),achar(9),dummy
+ enddo
+enddo
+
+
+write(100,'(a)') 'VECTORS VelocityCorrection double'
+
+do j=1,Ny
+ do i=1,Nx
+  iPoint = i + (j-1)*Nx
+  write(100,'(F8.6,A,F8.6,A,F8.6)') Vel_Corr(1,iPoint),achar(9),Vel_Corr(2,iPoint),achar(9),dummy
  enddo
 enddo
 close(100)
