@@ -40,15 +40,6 @@ use global_vars
        F_s(2) = -mu*Gr_s*dx ! dv/dy|_s
     endif       
        
-       
-       if(wrt_data .eq. 1) then
-       write(17,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx,Gr_e
-       write(17,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx,Gr_w
-       write(17,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx,Gr_n
-       write(17,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx,Gr_s
-       write(17,*)
-       endif
-       
        !--- Update Jacobians ---!
     if (i.ne.Nx) then
        !East

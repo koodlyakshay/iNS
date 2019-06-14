@@ -172,3 +172,15 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
   return
 
 end
+
+
+subroutine AddTotJac()
+
+
+end subroutine AddTotJac
+
+
+subroutine SubtractTotJac()
+
+
+end subroutine SubtractTotJac
