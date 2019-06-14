@@ -1,3 +1,5 @@
+!> \file sub_read_input.f90
+!! \brief Subroutine to read input data from ../inp/grid.inp, ../inp/solver.inp, ../inp/numerics.inp and ../inp/flow.inp files.
 subroutine read_input
 
 use global_vars

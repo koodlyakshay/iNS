@@ -1,3 +1,6 @@
+!> \file sub_linear_algebra.f90
+!! \brief File with linear solver and other matrix related operations.
+
 subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
 parameter(ITERMAX=5000)            ! Maximal number of iterations
 parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)

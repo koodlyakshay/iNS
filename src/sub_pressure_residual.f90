@@ -1,3 +1,5 @@
+!> \file sub_pressure_residual.f90
+!! \brief Subroutine to compute contribution of pressure grdient to the residual of momentum equation.
 subroutine pressure_residual
 
  use global_vars

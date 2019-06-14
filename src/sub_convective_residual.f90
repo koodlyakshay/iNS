@@ -1,3 +1,6 @@
+!> \file sub_convective_residual.f90
+!! \brief Subroutine to compute residual contribution from convection terms of the momentum equations.
+
 subroutine convective_residual
 
 use global_vars

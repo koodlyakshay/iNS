@@ -1,3 +1,5 @@
+!> \file mod_global.f90
+!! \brief File with global variables.
 module global_vars
 
 implicit none

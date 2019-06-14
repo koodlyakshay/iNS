@@ -1,3 +1,5 @@
+!> \file sub_viscous_residual.f90
+!! \brief Subroutine to compute the viscous contribution to the residual for the momentum equations.
 subroutine viscous_residual
 
 use global_vars

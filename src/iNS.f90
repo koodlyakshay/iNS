@@ -416,6 +416,8 @@ call sub_output
 close(11)
 close(12)
 
+call delete_vars
+
 end program iNS
 
 

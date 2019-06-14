@@ -1,3 +1,5 @@
+!> \file sub_output.f90
+!! \brief Subroutine to write solution output in .vtk format.
 subroutine sub_output
 
 use global_vars

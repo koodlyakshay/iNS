@@ -1,3 +1,6 @@
+!> \file sub_compute_massflux.f90
+!! \brief Subroutine to compute massflux using Rhie-Chow momentum interpolation method.
+
 subroutine compute_massflux
 
 use global_vars

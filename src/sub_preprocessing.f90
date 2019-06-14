@@ -1,3 +1,6 @@
+!> \file sub_preprocessing.f90
+!! \brief Subroutine to perform some preprocessing operations.
+
 subroutine preprocessing
 
  use global_vars
