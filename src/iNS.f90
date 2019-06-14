@@ -17,25 +17,38 @@ use global_vars
 
 implicit none
 
-call read_input
-
-call allocate_vars
-
-call initialize_vars
+  logical :: dir_exist
 
 !--- Output Files ---!
-open(unit=20,file='../out/test/Mass.txt',status='unknown')
-open(unit=22,file='../out/test/Velcorro2.txt',status='unknown')
-if (wrt_data .eq. 1) then
-  open(unit=16,file='../out/test/Convbudgetspb.txt',status='unknown')
-  open(unit=17,file='../out/test/Viscbudgetspb.txt',status='unknown')
-  open(unit=18,file='../out/test/presbudgetspb.txt',status='unknown')
-  open(unit=19,file='../out/test/Residuals.txt',status='unknown')
-  open(unit=20,file='../out/test/Flowres.txt',status='unknown')
-  open(unit=21,file='../out/test/Poissongradandres.txt',status='unknown')
-  
-endif
-open(unit=21,file='../out/test/Poissongradwall.txt',status='unknown')
+! Check if we need to create directories
+  inquire(file="../out", exist=dir_exist)
+  if (.not. dir_exist) call system('mkdir ../out')
+  inquire(file="../out/test", exist=dir_exist)
+  if (.not. dir_exist) call system('mkdir ../out/test')
+
+!! Read input data
+  call read_input
+
+!! allocate variables
+  call allocate_vars
+
+!! Initialize variables
+  call initialize_vars
+
+!! Open files to be written
+  open(unit=20,file='../out/test/Mass.txt',status='unknown')
+  open(unit=22,file='../out/test/Velcorro2.txt',status='unknown')
+  if (wrt_data .eq. 1) then
+    open(unit=16,file='../out/test/Convbudgetspb.txt',status='unknown')
+    open(unit=17,file='../out/test/Viscbudgetspb.txt',status='unknown')
+    open(unit=18,file='../out/test/presbudgetspb.txt',status='unknown')
+    open(unit=19,file='../out/test/Residuals.txt',status='unknown')
+    open(unit=20,file='../out/test/Flowres.txt',status='unknown')
+    open(unit=21,file='../out/test/Poissongradandres.txt',status='unknown')
+    
+  endif
+  open(unit=21,file='../out/test/Poissongradwall.txt',status='unknown')
+
 !--- Begin Solver ---!
 
 do ExtIter = 1,nExtIter
