@@ -17,7 +17,7 @@ Sol(1:2,:) = 0.0
         D(2,iPoint) = Vol(iPoint)/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
      enddo
      Res_l2 = sqrt(Res_l2/nPoint)
-     if (modulo(MIter,p_screen1) .eq. 0) print*,'Res: ',log10(Res_l2),MIter,ExtIter
+     if ((modulo(ExtIter,p_out) .eq. 0) .and. (MIter .eq. nMIter)) print*,'Res: ',log10(Res_l2),MIter,ExtIter
 end subroutine explicit_euler
 
 subroutine implicit_euler

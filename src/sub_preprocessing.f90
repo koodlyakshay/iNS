@@ -1,8 +1,8 @@
 !> \file sub_preprocessing.f90
 !! \brief Subroutine to perform some preprocessing operations.
 
-subroutine preprocessing
-
+subroutine preprocessing_flow
+!--- Set old variables, compute gradient ---!
  use global_vars
    
    R = 0.0
@@ -30,4 +30,4 @@ subroutine preprocessing
    call compute_gradient
 
 
-end subroutine preprocessing
+end subroutine preprocessing_flow
