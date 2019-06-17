@@ -156,8 +156,6 @@ implicit none
 
 integer     :: i, j, iPoint, jPoint
 
-  jPoint = 610
-
 !--- Boundary elements ---!
    !--- Lower wall (j=1) ---!
    j=1
@@ -167,7 +165,7 @@ integer     :: i, j, iPoint, jPoint
       !South
       R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx
       
-      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -179,7 +177,7 @@ integer     :: i, j, iPoint, jPoint
      !North
      R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx
      
-     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+     !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -190,7 +188,7 @@ integer     :: i, j, iPoint, jPoint
     Jac(iPoint,:) = 0.0
     !West
     R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy
-    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+    !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -201,7 +199,7 @@ integer     :: i, j, iPoint, jPoint
     iPoint = i + (j-1)*Nx
     !East
     R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy
-    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+    !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -213,12 +211,12 @@ integer     :: i, j, iPoint, jPoint
    !Inlet face(West)
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy) 
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy) 
 
    
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
    
 
    i=1
@@ -228,12 +226,12 @@ integer     :: i, j, iPoint, jPoint
    !Inlet face(West)
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
           
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint)+ D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint)+ D(2,iPoint)*(dx/dy)
       
    i=Nx
    j=Ny
@@ -242,12 +240,12 @@ integer     :: i, j, iPoint, jPoint
    !East (outlet)
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
    
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
     
    i=Nx
@@ -257,12 +255,12 @@ integer     :: i, j, iPoint, jPoint
    !East
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
          
-   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
 
 end subroutine boundary_conditions
