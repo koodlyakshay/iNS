@@ -11,6 +11,7 @@
 subroutine read_input
 
 use global_vars
+use output_vars
 
 implicit none
 
@@ -41,11 +42,9 @@ character(len=100)   :: filename
   read(16, nml=flow)
   
   
-  nPoint = Nx*Ny
-  nDim = 2
   dx = Lx/(Nx-1)
   dy = Ly/(Ny-1)
-  nVar = nDim
+  nVar = 2
   
   close(16)
   

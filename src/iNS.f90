@@ -25,6 +25,7 @@
 program iNS
 
 use global_vars
+use output_vars
 
 implicit none
 

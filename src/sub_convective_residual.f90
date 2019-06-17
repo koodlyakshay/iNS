@@ -4,6 +4,11 @@
 subroutine convective_residual
 
 use global_vars
+implicit none
+
+integer           :: i,j,iPoint,jpoint
+real              :: FaceFlux
+
 
 do i=1,Nx
     do j=1,Ny

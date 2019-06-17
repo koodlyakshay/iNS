@@ -2,11 +2,14 @@
 !! \brief File with linear solver and other matrix related operations.
 
 subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
-parameter(ITERMAX=5000)            ! Maximal number of iterations
-parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
-  integer crit, n, iter, rc
-  REAL*8 mat(n,n),b(n),omega
-  REAL*8 x(n),residu(n)
+implicit none
+
+integer, parameter    :: ITERMAX=5000            ! Maximal number of iterations
+real*8, parameter       :: ONE=1.d0, TWO=2.d0, ZERO=0.d0
+integer               :: crit, n, iter, rc
+integer               :: i, j
+REAL*8                  :: mat(n,n),b(n),omega
+REAL*8                  :: x(n),residu(n)
 !*====================================================================*
 !*                                                                    *
 !*  seidel solves the linear system  mat * x = b  iteratively.        *
@@ -68,7 +71,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
 !*               = 13     Schmidt-v.Mises criterion violated          *
 !*                                                                    *
 !*====================================================================*
-  REAL*8 tmp, eps;
+REAL*8      :: tmp, eps;
 
    rc = 0                       
    iter = 0 !Initialize iteration counter

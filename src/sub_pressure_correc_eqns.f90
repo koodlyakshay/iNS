@@ -1,67 +1,75 @@
 subroutine pressure_correc_eqn
 
 use global_vars
+use output_vars
+
+implicit none
+
+integer           :: iPoint, nPoint, PIter
+real              :: res_l2
+
 
 !---------------- Solve Pressure correction equation now --------------!
 !----------------------------------------------------------------------!
-   Sol(3,:) = 0.d0
-   P_Correc = 0.0
-   GradPc = 0.0
-do PIter = 1,nPIter
+  nPoint = Nx*Ny
+  Sol(3,:) = 0.d0
+  P_Correc = 0.0
+  GradPc = 0.0
 
-   R(3,:) = 0.d0  
-   
-   !--- Compute pressure correction gradient ---!
-   call compute_pcgradientgg
-   
-   !--- Compute residual for the pressure correction equation ---!
-   call compute_pcresidual
-
-   call boundary_conditions
-   
-      
-   if (implicit_time) then
-   
-   mass_l2 = 0.d0
-   Res_l2 = 0.0
-   do iPoint=1,nPoint
-     R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
-     R(3,iPoint) = -R(3,iPoint)
+  do PIter = 1,nPIter
+  
+     R(3,:) = 0.d0  
      
-     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Vol(iPoint)/dt_p
-          
-     Res_l2 = Res_l2 + R(3,iPoint)**2.0
-   enddo
-   close(19)
+     !--- Compute pressure correction gradient ---!
+     call compute_pcgradientgg
+     
+     !--- Compute residual for the pressure correction equation ---!
+     call compute_pcresidual
+  
+     call boundary_conditions
+     
+        
+     if (implicit_time) then
+     
+     Res_l2 = 0.0
 
-   Res_l2 = sqrt(Res_l2/nPoint)
-   if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
-      
-   !--- Solve pressure correction equation ---!
-   call seidel(0,nPoint,Jac(:,:),R(3,:),1.d0,Sol(3,:),Res(:),liniter,convergence)
-   if (convergence .ne. 0) print*, 'Error in p',convergence,ExtIter
-   
-   do iPoint = 1,nPoint
-     P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
-   enddo
-   
-   !--- Time Integration (Explicit) ---!
-   else  
-     Res_l2 = 0.d0
      do iPoint=1,nPoint
-        R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
-        P_Correc(iPoint) = P_Correc(iPoint) - R(3,iPoint)*dt_p/Vol(iPoint)
-        Res_l2 = Res_l2 + R(3,iPoint)**2.0
+       R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
+       R(3,iPoint) = -R(3,iPoint)
+       
+       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Vol(iPoint)/dt_p
+            
+       Res_l2 = Res_l2 + R(3,iPoint)**2.0
+     enddo
+  
+     Res_l2 = sqrt(Res_l2/nPoint)
+     if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
+        
+     !--- Solve pressure correction equation ---!
+     call seidel(0,nPoint,Jac(:,:),R(3,:),1.d0,Sol(3,:),Res(:),liniter,convergence)
+     if (convergence .ne. 0) print*, 'Error in p',convergence,ExtIter
+     
+     do iPoint = 1,nPoint
+       P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
      enddo
      
-     Res_l2 = sqrt(Res_l2/nPoint)
-   if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
-   endif 
-   
-   if (Piter .eq. nPIter)call compute_pcgradientgg
-    
-    
- enddo   !PIter
+     !--- Time Integration (Explicit) ---!
+     else  
+       Res_l2 = 0.d0
+       do iPoint=1,nPoint
+          R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
+          P_Correc(iPoint) = P_Correc(iPoint) - R(3,iPoint)*dt_p/Vol(iPoint)
+          Res_l2 = Res_l2 + R(3,iPoint)**2.0
+       enddo
+       
+       Res_l2 = sqrt(Res_l2/nPoint)
+     if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
+     endif 
+     
+     if (Piter .eq. nPIter)call compute_pcgradientgg
+      
+      
+  enddo   !PIter
 
 end subroutine pressure_correc_eqn
 
@@ -73,6 +81,9 @@ subroutine compute_pcresidual
 !--- where \underbar{D}_f is the inverse of momentum coefficient of the two points calculated at the face ---!
 
 use global_vars
+implicit none
+
+integer     :: i, j, iPoint, jPoint
 
 !--- Assemble pressure equation ---!
  do i=1,Nx
@@ -134,14 +145,18 @@ use global_vars
    enddo
   enddo
 
-
-
 end subroutine compute_pcresidual
 
 
 subroutine boundary_conditions
 
 use global_vars
+
+implicit none
+
+integer     :: i, j, iPoint, jPoint
+
+  jPoint = 610
 
 !--- Boundary elements ---!
    !--- Lower wall (j=1) ---!

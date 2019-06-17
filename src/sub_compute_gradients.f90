@@ -3,6 +3,12 @@
 subroutine compute_gradient
 
 use global_vars
+implicit none
+
+integer           :: i,j
+
+
+
 
 !--- Compute gradients at nodes ---!
    do i=2,Nx-1
@@ -105,6 +111,9 @@ end subroutine compute_gradient
 subroutine compute_pcgradient
 
 use global_vars
+implicit none
+
+integer           :: i,j
 
 !--- Compute gradients at nodes ---!
    do i=2,Nx-1
@@ -186,7 +195,10 @@ end subroutine compute_pcgradient
 subroutine compute_pcgradientgg
 
 use global_vars
-real*8 part_grad
+implicit none
+
+real        :: part_grad
+integer     :: i,j,iPoint,jpoint
 
 
 do i=1,Nx

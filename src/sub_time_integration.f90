@@ -3,9 +3,20 @@
 subroutine explicit_euler
 
 use global_vars
+use output_vars
 
-Sol(1:2,:) = 0.0
-     do iPoint=1,nPoint
+implicit none
+
+integer           :: iPoint, nPoint
+real              :: Res_l2
+real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
+
+  nPoint = Nx*Ny
+  Sol(1:2,:) = 0.0
+  Res_l2 = 0.d0
+
+
+do iPoint=1,nPoint
         U(1,iPoint) = U_old(1,iPoint) - alfa*R(1,iPoint)*dt_m/Vol(iPoint)
         U(2,iPoint) = U_old(2,iPoint) - alfa*R(2,iPoint)*dt_m/Vol(iPoint)
         
@@ -23,6 +34,16 @@ end subroutine explicit_euler
 subroutine implicit_euler
 
 use global_vars
+use output_vars
+
+implicit none
+
+integer           :: iPoint, nPoint
+real              :: Res_l2
+real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
+
+  nPoint = Nx*Ny
+  Res_l2 = 0.d0
 
 do iPoint=1,nPoint
         Tot_R((iPoint-1)*nVar+1) = -R(1,iPoint)

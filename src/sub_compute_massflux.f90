@@ -4,12 +4,20 @@
 subroutine compute_massflux
 
 use global_vars
+use output_vars
 
+implicit none
 
-Mass = 0.d0
-mass_in = 0.0
-mass_out = 0.0
-P_Correc = 0.d0
+integer           :: i,j,iPoint,jpoint
+integer           :: nPoint
+real              :: GradPi,  GradPav
+real              :: mass_in, mass_out, mass_l2
+
+  nPoint = Nx*Ny
+  Mass = 0.d0
+  mass_in = 0.0
+  mass_out = 0.0
+  P_Correc = 0.d0
    do i=2,Nx-1
     do j=2,Ny-1
     !--- Point definition ---!

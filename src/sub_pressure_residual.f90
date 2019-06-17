@@ -3,6 +3,9 @@
 subroutine pressure_residual
 
  use global_vars
+ implicit none
+ 
+integer     :: i, j, iPoint
 
   do i=1,Nx
     do j=1,Ny   

@@ -2,6 +2,7 @@ PROG =	iNS
 
 SRCS =	iNS.f90 \
 	mod_global.f90 \
+	mod_output.f90 \
 	sub_compute_gradients.f90 \
 	sub_compute_massflux.f90 \
 	sub_convective_residual.f90 \
@@ -19,6 +20,7 @@ SRCS =	iNS.f90 \
 
 OBJS =	iNS.o \
 	mod_global.o \
+	mod_output.o \
 	sub_compute_gradients.o \
 	sub_compute_massflux.o \
 	sub_convective_residual.o \
@@ -57,17 +59,17 @@ clean:
 .f90.o:
 	$(F90) $(F90FLAGS) -c $<
 
-iNS.o: mod_global.o
+iNS.o: mod_global.o mod_output.o
 sub_compute_gradients.o: mod_global.o
-sub_compute_massflux.o: mod_global.o
+sub_compute_massflux.o: mod_global.o mod_output.o
 sub_convective_residual.o: mod_global.o
 sub_flow_correction.o: mod_global.o
 sub_momentum_equations.o: mod_global.o
-sub_output.o: mod_global.o
+sub_output.o: mod_global.o mod_output.o
 sub_preprocessing.o: mod_global.o
-sub_pressure_correc_eqns.o: mod_global.o
+sub_pressure_correc_eqns.o: mod_global.o mod_output.o
 sub_pressure_residual.o: mod_global.o
-sub_read_input.o: mod_global.o
-sub_time_integration.o: mod_global.o
+sub_read_input.o: mod_global.o mod_output.o
+sub_time_integration.o: mod_global.o mod_output.o
 sub_variable_operations.o: mod_global.o
 sub_viscous_residual.o: mod_global.o

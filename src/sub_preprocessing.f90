@@ -1,10 +1,17 @@
 !> \file sub_preprocessing.f90
 !! \brief Subroutine to perform some preprocessing operations.
 
-subroutine preprocessing_flow
 !--- Set old variables, compute gradient ---!
- use global_vars
-   
+subroutine preprocessing_flow
+use global_vars
+
+implicit none
+
+integer           :: i,j
+integer           :: iPoint, nPoint
+
+  nPoint = Nx*Ny
+  
    R = 0.0
    Tot_Jac = 0.0
    Fc = 0.0

@@ -2,6 +2,10 @@ subroutine momentum_eqns
 
 use global_vars
 
+implicit none
+
+integer     :: i,j
+
 !----------------------------------------------------------------------!
   do MIter = 1,nMIter
    !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
@@ -33,8 +37,6 @@ use global_vars
    !--- Upper (j=Ny) ---!
    call upper_boundary_flow
    
-   Res_l2 = 0.d0
-
    if (implicit_time) then
    !--- Time Integration (Implicit) ---!
    call implicit_euler

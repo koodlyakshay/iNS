@@ -6,6 +6,10 @@ subroutine sub_flow_correction
 
 use global_vars
 
+implicit none
+
+integer     :: i, j, iPoint, jPoint
+
 
    do i=2,Nx-1
     do j=2,Ny-1
