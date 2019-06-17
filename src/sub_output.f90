@@ -4,7 +4,7 @@ subroutine sub_output
 
 use global_vars
 
-real*8            :: dummy
+real            :: dummy
 character         :: fmt1(30),fmt2
 
 

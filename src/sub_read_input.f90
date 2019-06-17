@@ -1,9 +1,6 @@
 !> \file sub_read_input.f90
 !! \brief Subroutine to read input data from ../inp/grid.inp, ../inp/solver.inp, ../inp/numerics.inp and ../inp/flow.inp files.
-subroutine read_input
-
-use global_vars
-
+!!
 !--- Grid definition ---!
 ! *---*---*---*---*   j=Ny
 ! *---*---*---*---*    .
@@ -11,28 +8,45 @@ use global_vars
 ! *---*---*---*---*    .
 ! *---*---*---*---*   j=1
 !i=1,...........,i=Nx
-open(unit=16,file='../inp/grid.inp',status='unknown')
-open(unit=17,file='../inp/solver.inp',status='unknown')
-open(unit=18,file='../inp/numerics.inp',status='unknown')
-open(unit=19,file='../inp/flow.inp',status='unknown')
+subroutine read_input
 
-read(16,grid)
+use global_vars
 
-read(17,solver)
-
-read(18,numerics)
-
-read(19,flow)
+implicit none
 
 
-nPoint = Nx*Ny
-nDim = 2
-dx = Lx/(Nx-1)
-dy = Ly/(Ny-1)
-nVar = nDim
+namelist            /grid/ Lx,Ly,Nx,Ny,xmin,ymin
+namelist            /solver/ implicit_time,upwind,muscl,nExtIter,nPIter,nMIter,p_screen1,p_screen2,p_out,file_out
+namelist            /numerics/ kappa,Param_p,dt_m,dt_p
+namelist            /flow/ U_inf,rho,mu,Re_l,P_inf
 
-close(16)
-close(17)
-close(18)
-close(19)
+character(len=100)   :: filename
+
+  CALL get_command_argument(1, filename)
+  IF (len_TRIM(filename) == 0) then
+    print*, "Please provide the input file name!"
+    stop
+  endif
+ 
+  print*, "input file: ", trim(filename)
+
+  open(unit=16, file=trim(filename), status='old')
+  
+  read(16, nml=grid)
+  
+  read(16, nml=solver)
+  
+  read(16, nml=numerics)
+  
+  read(16, nml=flow)
+  
+  
+  nPoint = Nx*Ny
+  nDim = 2
+  dx = Lx/(Nx-1)
+  dy = Ly/(Ny-1)
+  nVar = nDim
+  
+  close(16)
+  
 end subroutine read_input

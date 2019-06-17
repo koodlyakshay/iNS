@@ -1,0 +1,36 @@
+&grid
+ Lx = 1.0
+ Ly = 0.125
+ Nx = 21
+ Ny = 31
+ xmin = 0.0
+ ymin = 0.0
+/
+
+&solver 
+ implicit_time = .false.
+ upwind = .true.
+ muscl = .true.
+ nExtIter = 10000
+ nMIter = 10
+ nPIter = 10
+ p_screen1 = 100
+ p_screen2 = 100
+ p_out = 500
+ file_out = 'flow_fine'
+/
+
+&numerics
+ Param_p = 0.3
+ kappa = 0.0e-0
+ dt_m = 2.5e-3
+ dt_p = 2.5e-3
+/
+
+&flow 
+ U_inf = 1.0
+ rho = 1.0
+ mu = 2.5e-3
+ Re_l = 0.25
+ P_inf = 0.0
+/
