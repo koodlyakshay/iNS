@@ -1,23 +1,23 @@
 &grid
- Lx = 1.0
- Ly = 0.125
- Nx = 21
- Ny = 15
- xmin = -0.01
- ymin = -0.01
+ Lx = 1.0                     ! domain size in x-direction
+ Ly = 0.125                   ! domain size in y-direction
+ Nx = 41                      ! maximum grid points in x-direction
+ Ny = 32                      ! maximum grid points in x-direction
+ xmin =-0.01                  ! starting point of the grid in x-axis
+ ymin = -0.01                 ! starting point of the grid in y-axis
 /
 
 &solver 
- implicit_time = .false.
- upwind = .true.
- muscl = .true.
- nExtIter = 5000
- nMIter = 10
- nPIter = 10
- p_screen1 = 100
- p_screen2 = 100
- p_out = 1000
- file_out = 'flow_fine'
+ implicit_time = .false.      ! implicit time integration (or not)
+ upwind = .true.              ! upwind or central scheme
+ muscl = .true.               ! true=2nd order, false=1st order
+ nExtIter = 100               ! nr. of external iterations
+ nMIter = 2                   ! nr. of iterations for the momentum eqautions
+ nPIter = 2                   ! nr. of iterations for Poisson solver
+ p_screen1 = 100              ! frequency of screen output
+ p_screen2 = 100              ! frequency of screen output
+ p_out = 50                   ! frequency of output files 
+ file_out = 'flow_fine'       ! output file name
 /
 
 &numerics

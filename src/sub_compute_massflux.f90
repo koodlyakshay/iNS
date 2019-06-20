@@ -1,7 +1,7 @@
 !> \file sub_compute_massflux.f90
 !! \brief Subroutine to compute massflux using Rhie-Chow momentum interpolation method.
 
-subroutine compute_massflux
+subroutine compute_massflux(extiter)
 
 use global_vars
 use output_vars
@@ -10,6 +10,7 @@ implicit none
 
 integer           :: i,j,iPoint,jpoint
 integer           :: nPoint
+integer           :: ExtIter
 real              :: GradPi,  GradPav
 real              :: mass_in, mass_out, mass_l2
 

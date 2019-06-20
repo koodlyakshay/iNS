@@ -12,6 +12,7 @@ subroutine read_input
 
 use global_vars
 use output_vars
+use parameters
 
 implicit none
 

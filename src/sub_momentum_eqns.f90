@@ -1,10 +1,12 @@
-subroutine momentum_eqns
+subroutine momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
 
 use global_vars
 
 implicit none
 
 integer     :: i,j
+integer     :: ExtIter, miter, nmiter
+logical     :: implicit_time, upwind, muscl
 
 !----------------------------------------------------------------------!
   do MIter = 1,nMIter
@@ -16,7 +18,7 @@ integer     :: i,j
    !--- Compute spatial discretization (Space Integration) ---!
    
    !--- Convective terms (1st order upwind/Central) ---!
-   call convective_residual
+   call convective_residual(upwind, muscl)
        
    !--- Viscous terms ---!
    call viscous_residual
@@ -39,11 +41,11 @@ integer     :: i,j
    
    if (implicit_time) then
    !--- Time Integration (Implicit) ---!
-   call implicit_euler
+   call implicit_euler(miter, nmiter, extiter)
    
    else   
    !--- Time Integration (Explicit) ---!
-   call explicit_euler
+   call explicit_euler(miter, nmiter, extiter)
      
    endif
    
@@ -55,7 +57,11 @@ end subroutine momentum_eqns
 
 subroutine left_boundary_flow
 !--- Left (i=1) ---!
- use global_vars
+
+use global_vars
+implicit none
+
+  integer   :: i, j, ipoint
 
  i=1
  do j=1,Ny
@@ -78,7 +84,10 @@ end subroutine left_boundary_flow
 
 subroutine right_boundary_flow
 !--- Right (i=Nx) ---!
- use global_vars
+use global_vars
+implicit none
+
+  integer   :: i, j, ipoint
 
  !Zero gradient at the wall. Only a convective flux is added. 
  !The visc contribution is zero because of zero gradient.
@@ -108,7 +117,12 @@ end subroutine right_boundary_flow
 
 subroutine lower_boundary_flow
 !--- Lower (j=1) ---!
- use global_vars
+use global_vars
+implicit none
+
+  integer   :: i, j, ipoint
+ 
+ 
  j=1
  do i=1,Nx
    iPoint = i + (j-1)*Nx
@@ -134,7 +148,10 @@ end subroutine lower_boundary_flow
 
 subroutine upper_boundary_flow
 !--- Upper (j=Ny) ---!
- use global_vars
+use global_vars
+implicit none
+
+  integer   :: i, j, ipoint
  
  j=Ny
  do i=1,Nx

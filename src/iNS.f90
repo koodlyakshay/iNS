@@ -26,9 +26,11 @@ program iNS
 
 use global_vars
 use output_vars
+use parameters
 
 implicit none
 
+integer           :: ExtIter
 logical           :: old
 
 inquire(file = '../out/',exist=old)
@@ -49,19 +51,18 @@ do ExtIter = 1,nExtIter
 
 !---------------------- Solve momentum equation -----------------------!
 
-call momentum_eqns
+call momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
 
 !--- Compute residual mass flux from vel solution ---!
-call compute_massflux
+call compute_massflux(extiter)
 
 !---------------- Solve pressure corrrection equation -----------------!
 
-call pressure_correc_eqn
+call pressure_correc_eqn(nPIter, extiter, implicit_time)
 
 !--- Correct pressure and velocities ---!
   
 call sub_flow_correction
-  
 
 !--- Convergence monitoring ---!
    

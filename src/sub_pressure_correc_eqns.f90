@@ -1,4 +1,4 @@
-subroutine pressure_correc_eqn
+subroutine pressure_correc_eqn(npiter, extiter, implicit_time)
 
 use global_vars
 use output_vars
@@ -6,8 +6,10 @@ use output_vars
 implicit none
 
 integer           :: iPoint, nPoint, PIter
+integer           :: ExtIter, npiter
+integer           :: convergence, liniter
 real              :: res_l2
-
+logical           :: implicit_time
 
 !---------------- Solve Pressure correction equation now --------------!
 !----------------------------------------------------------------------!
@@ -15,7 +17,8 @@ real              :: res_l2
   Sol(3,:) = 0.d0
   P_Correc = 0.0
   GradPc = 0.0
-
+  liniter = 0
+  
   do PIter = 1,nPIter
   
      R(3,:) = 0.d0  

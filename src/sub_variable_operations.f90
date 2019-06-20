@@ -6,7 +6,7 @@ use global_vars
 implicit none
 
 integer     :: nPoint
-
+real        :: CFL
   nPoint = Nx*Ny
 
 

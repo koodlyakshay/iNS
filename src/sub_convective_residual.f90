@@ -1,13 +1,14 @@
 !> \file sub_convective_residual.f90
 !! \brief Subroutine to compute residual contribution from convection terms of the momentum equations.
 
-subroutine convective_residual
+subroutine convective_residual(upwind, muscl)
 
 use global_vars
 implicit none
 
 integer           :: i,j,iPoint,jpoint
 real              :: FaceFlux
+logical           :: upwind, muscl
 
 
 do i=1,Nx
