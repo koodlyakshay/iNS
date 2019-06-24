@@ -6,7 +6,7 @@
 subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
 implicit none
 
-integer, parameter    :: ITERMAX=5000            ! Maximal number of iterations
+integer, parameter    :: ITERMAX=50            ! Maximal number of iterations
 real*8, parameter       :: ONE=1.d0, TWO=2.d0, ZERO=0.d0
 integer               :: crit, n, iter, rc
 integer               :: i, j

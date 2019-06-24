@@ -113,10 +113,18 @@ integer     :: i, j, iPoint, jPoint
     if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.d0
     !North
     jPoint = i + (j+1-1)*Nx
-     F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    if (j.ne.Ny) then
+      F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    else 
+      F_n(1) = (P_Correc(iPoint))*dx/2.d0
+    endif    
     !South
     jPoint = i + (j-1-1)*Nx
-    F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    if (j .ne. 1) then 
+        F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
+    else
+        F_s(1) = (P_Correc(iPoint))*dx/2.0
+    endif
       
     Vel_Corr(1,iPoint) = 0.0
     

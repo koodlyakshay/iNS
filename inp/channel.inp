@@ -8,23 +8,23 @@
 /
 
 &solver 
- implicit_time = .false.      ! implicit time integration (or not)
+ implicit_time = .true.      ! implicit time integration (or not)
  upwind = .true.              ! upwind or central scheme
  muscl = .true.               ! true=2nd order, false=1st order
- nExtIter = 100               ! nr. of external iterations
+ nExtIter = 2000               ! nr. of external iterations
  nMIter = 2                   ! nr. of iterations for the momentum eqautions
  nPIter = 2                   ! nr. of iterations for Poisson solver
  p_screen1 = 100              ! frequency of screen output
  p_screen2 = 100              ! frequency of screen output
  p_out = 50                   ! frequency of output files 
- file_out = 'flow_fine'       ! output file name
+ file_out = 'flow_imp'       ! output file name
 /
 
 &numerics
  Param_p = 0.3
  kappa = 0.0e-0
- dt_m = 2.5e-3
- dt_p = 2.5e-3
+ dt_m = 3e-3
+ dt_p = 3e-3
 /
 
 &flow 

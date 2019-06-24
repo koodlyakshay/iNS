@@ -50,7 +50,7 @@ logical           :: implicit_time
         
      !--- Solve pressure correction equation ---!
      call seidel(0,nPoint,Jac(:,:),R(3,:),1.d0,Sol(3,:),Res(:),liniter,convergence)
-     if (convergence .ne. 0) print*, 'Error in p',convergence,ExtIter
+     if ((convergence .ne. 0) .and. (convergence .ne. 4)) print*, 'Error in p',convergence,ExtIter
      
      do iPoint = 1,nPoint
        P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
