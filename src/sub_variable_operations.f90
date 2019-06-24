@@ -20,6 +20,7 @@ end subroutine allocate_vars
 subroutine initialize_vars
 
 use global_vars
+use parameters
 
 logical           :: old
 
@@ -96,6 +97,7 @@ do iPoint = 1,nPoint
  U_old(2,iPoint) = 0.0
 enddo
 
+if (restart) call read_restart
 
 open(unit=10,file='../out/Solver_details.txt',status='unknown')
 write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)

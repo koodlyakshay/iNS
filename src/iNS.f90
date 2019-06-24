@@ -73,6 +73,10 @@ if (modulo(ExtIter,p_out) .eq. 0) then
      call sub_output
 endif
 
+if (modulo(ExtIter,p_rest) .eq. 0) then
+     call write_restart
+endif
+
 
 enddo !ExtIter
 

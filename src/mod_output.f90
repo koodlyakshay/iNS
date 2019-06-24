@@ -6,7 +6,7 @@ implicit none
 
 
 
-integer           :: p_screen1, p_screen2, p_out
+integer           :: p_screen1, p_screen2, p_out, p_rest
 character(len=100)  :: file_out
 
 
