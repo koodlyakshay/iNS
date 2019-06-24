@@ -1,6 +1,8 @@
 !> \file sub_linear_algebra.f90
 !! \brief File with linear solver and other matrix related operations.
 
+!!seidel(0,nPoint*nVar,Mat,Tot_R(:),1.d0,Tot_Sol(:),Res(:),liniter,convergence)
+
 subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
 implicit none
 
