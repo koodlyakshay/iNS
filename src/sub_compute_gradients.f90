@@ -211,9 +211,9 @@ do i=1,Nx
   if (i .ne. Nx) then
     jPoint = i+1 + (j-1)*Nx
     if ((j.eq.1).or.(j.eq.Ny)) then
-       part_grad = 5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+       part_grad = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     else 
-       part_grad = 5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+       part_grad = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
     endif
     GradPc(1,i,j) = GradPc(1,i,j) + part_grad
   endif
@@ -221,9 +221,9 @@ do i=1,Nx
   if (i .ne. 1) then
     jPoint = i-1 + (j-1)*Nx
      if ((j.eq.1).or.(j.eq.Ny)) then
-       part_grad = -5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+       part_grad = -0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     else 
-       part_grad = -5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dy
+       part_grad = -0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
     endif
     GradPc(1,i,j) = GradPc(1,i,j) + part_grad
   endif
@@ -231,9 +231,9 @@ do i=1,Nx
   if (j.ne.Ny) then
     jPoint = i + (j+1-1)*Nx
     if ((i.eq.1).or.(i.eq.Nx)) then
-       part_grad = 5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.d0
+       part_grad = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     else
-       part_grad = 5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+       part_grad = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
     endif
     GradPc(2,i,j) = GradPc(2,i,j) + part_grad
   endif
@@ -241,9 +241,9 @@ do i=1,Nx
   if (j.ne.1) then
     jPoint = i + (j-1-1)*Nx
     if ((i.eq.1).or.(i.eq.Nx)) then
-       part_grad = -5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.d0
+       part_grad = -0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     else
-       part_grad = -5.d-1*(P_Correc(iPoint) + P_Correc(jPoint))*dx
+       part_grad = -0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
     endif
     GradPc(2,i,j) = GradPc(2,i,j) + part_grad
   endif
@@ -290,11 +290,11 @@ enddo
    iPoint = i + (j-1)*Nx
  
    !Inlet face(West)
-   part_grad = -(P_Correc(iPoint))*dy/2.d0
+   part_grad = -(P_Correc(iPoint))*dy/2.0
    GradPc(1,i,j) = GradPc(1,i,j) + part_grad
    
    !South
-   part_grad = -(P_Correc(iPoint))*dx/2.d0
+   part_grad = -(P_Correc(iPoint))*dx/2.0
    GradPc(2,i,j) = GradPc(2,i,j) + part_grad
    
    
@@ -304,11 +304,11 @@ enddo
    iPoint = i + (j-1)*Nx
 
    !Inlet face(West)
-   part_grad = -(P_Correc(iPoint))*dy/2.d0
+   part_grad = -(P_Correc(iPoint))*dy/2.0
    GradPc(1,i,j) = GradPc(1,i,j) + part_grad
        
    !North
-   part_grad = (P_Correc(iPoint))*dx/2.d0
+   part_grad = (P_Correc(iPoint))*dx/2.0
    GradPc(2,i,j) = GradPc(2,i,j) + part_grad
    
    
@@ -317,11 +317,11 @@ enddo
    iPoint = i + (j-1)*Nx
 
    !East (outlet)
-   part_grad = (P_Correc(iPoint))*dy/2.d0
+   part_grad = (P_Correc(iPoint))*dy/2.0
    GradPc(1,i,j) = GradPc(1,i,j) + part_grad
    
    !North
-   part_grad = (P_Correc(iPoint))*dx/2.d0
+   part_grad = (P_Correc(iPoint))*dx/2.0
    GradPc(2,i,j) = GradPc(2,i,j) + part_grad
    
     
@@ -330,11 +330,11 @@ enddo
    iPoint = i + (j-1)*Nx
 
    !East
-   part_grad = (P_Correc(iPoint))*dy/2.d0
+   part_grad = (P_Correc(iPoint))*dy/2.0
    GradPc(1,i,j) = GradPc(1,i,j) + part_grad
    
    !South
-   part_grad = -(P_Correc(iPoint))*dx/2.d0
+   part_grad = -(P_Correc(iPoint))*dx/2.0
    GradPc(2,i,j) = GradPc(2,i,j) + part_grad
    
    

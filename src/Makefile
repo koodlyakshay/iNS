@@ -45,7 +45,7 @@ CFLAGS = -O
 FC = f77
 FFLAGS = -O
 F90 = gfortran
-F90FLAGS = -O3 -g -fdefault-double-8 -fdefault-real-8 -Wno-tabs -fbounds-check -fbacktrace -ffree-line-length-none
+F90FLAGS = -O3 -g -fdefault-real-8 -Wno-tabs -fbounds-check -fbacktrace -ffree-line-length-none
 LDFLAGS = -s
 
 all: $(PROG)

@@ -47,10 +47,10 @@ integer     :: i, j, iPoint, jPoint
     P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     !East
     jPoint = i+1 + (j-1)*Nx
-    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     !West
     jPoint = i-1 + (j-1)*Nx
-    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     !North
     jPoint = i + (j+1-1)*Nx
      F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx
@@ -76,10 +76,10 @@ integer     :: i, j, iPoint, jPoint
 
     !East
     jPoint = i+1 + (j-1)*Nx
-    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     !West
     jPoint = i-1 + (j-1)*Nx
-    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.d0
+    F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy/2.0
     !North
     jPoint = i + (j+1-1)*Nx
     F_n(1) = (P_Correc(iPoint))*dx
@@ -106,17 +106,17 @@ integer     :: i, j, iPoint, jPoint
     !East
     jPoint = i+1 + (j-1)*Nx
     F_e(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy
-    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.d0
+    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.0
     !West
     jPoint = i-1 + (j-1)*Nx
     F_w(1) = P_Correc(iPoint)*dy
-    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.d0
+    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.0
     !North
     jPoint = i + (j+1-1)*Nx
     if (j.ne.Ny) then
       F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     else 
-      F_n(1) = (P_Correc(iPoint))*dx/2.d0
+      F_n(1) = (P_Correc(iPoint))*dx/2.0
     endif    
     !South
     jPoint = i + (j-1-1)*Nx
@@ -138,10 +138,10 @@ integer     :: i, j, iPoint, jPoint
    !--- Right outlet (i=Nx) ---!
    i=Nx
    do j=1,Ny
-    F_n = 0.d0
-    F_s = 0.d0
-    F_e = 0.d0
-    F_w = 0.d0
+    F_n = 0.0
+    F_s = 0.0
+    F_e = 0.0
+    F_w = 0.0
     iPoint = i + (j-1)*Nx
     !P(i,j) = P(i,j) + (1.0-alfa)*P_Correc(iPoint)
     P(i,j) = P_outlet
@@ -149,24 +149,24 @@ integer     :: i, j, iPoint, jPoint
     !East
     jPoint = i+1 + (j-1)*Nx
     F_e(1) = (P_Correc(iPoint))*dy
-    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.d0
+    if ((j.eq.Ny) .or. (j.eq.1)) F_e(1) = F_e(1)/2.0
     !West
     jPoint = i-1 + (j-1)*Nx
     F_w(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dy    
-    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.d0
+    if ((j.eq.Ny) .or. (j.eq.1)) F_w(1) = F_w(1)/2.0
     !North
     jPoint = i + (j+1-1)*Nx
     if (j.ne.Ny) then
       F_n(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     else 
-      F_n(1) = (P_Correc(iPoint))*dx/2.d0
+      F_n(1) = (P_Correc(iPoint))*dx/2.0
     endif
     !South
     jPoint = i + (j-1-1)*Nx
     if (j.ne.1) then
       F_s(1) = 0.5*(P_Correc(iPoint) + P_Correc(jPoint))*dx/2.0
     else 
-      F_s(1) = (P_Correc(iPoint))*dx/2.d0
+      F_s(1) = (P_Correc(iPoint))*dx/2.0
     endif
       
     Vel_Corr(1,iPoint) = (F_e(1) - F_w(1))/&

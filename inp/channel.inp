@@ -18,7 +18,7 @@
  p_screen2 = 100              ! frequency of screen output
  p_out = 50                   ! frequency of output files 
  file_out = 'flow_imp'        ! output file name
- restart = .true.             ! read from restart file
+ restart = .false.             ! read from restart file
  p_rest = 50                  ! frequency of restart files
 /
 

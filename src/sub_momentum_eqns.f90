@@ -99,11 +99,11 @@ implicit none
   !--- Have to add convective flux as is ---!     
   !--- Update residual ---!
   if ((j.eq.1) .or. (j.eq.Ny)) then
-     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy/2.d0,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
-     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy/2.d0,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)        
+     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy/2.0,0.0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.0)*U_old(1,iPoint)
+     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy/2.0,0.0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.0)*U_old(2,iPoint)        
   else
-     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(1,iPoint)
-     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.d0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.d0)*U_old(2,iPoint)      
+     R(1,iPoint) = R(1,iPoint) + max(rho*U_old(1,iPoint)*dy,0.0)*U_old(1,iPoint) ! max(rho*U_e*dy,0.0)*U_old(1,iPoint)
+     R(2,iPoint) = R(2,iPoint) + max(rho*U_old(1,iPoint)*dy,0.0)*U_old(2,iPoint) ! max(rho*U_e*dy,0.0)*U_old(2,iPoint)      
   endif
      
   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 1.0*U(1,iPoint)
@@ -126,7 +126,7 @@ implicit none
  j=1
  do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.2.d-2) then
+   if (x(i,j) .ge. 2.0e-2) then
      !--- Zero velocity ---!
      U_old(1:2,iPoint) = 0.0
      
@@ -156,7 +156,7 @@ implicit none
  j=Ny
  do i=1,Nx
    iPoint = i + (j-1)*Nx
-   if (x(i,j).ge.2.d-2) then
+   if (x(i,j) .ge. 2.0e-2) then
     !--- Fixed wall ---!
      U_old(1:2,iPoint) = 0.0
      

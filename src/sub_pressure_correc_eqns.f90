@@ -14,14 +14,14 @@ logical           :: implicit_time
 !---------------- Solve Pressure correction equation now --------------!
 !----------------------------------------------------------------------!
   nPoint = Nx*Ny
-  Sol(3,:) = 0.d0
+  Sol(3,:) = 0.0
   P_Correc = 0.0
   GradPc = 0.0
   liniter = 0
   
   do PIter = 1,nPIter
   
-     R(3,:) = 0.d0  
+     R(3,:) = 0.0  
      
      !--- Compute pressure correction gradient ---!
      call compute_pcgradientgg
@@ -49,7 +49,7 @@ logical           :: implicit_time
      if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
         
      !--- Solve pressure correction equation ---!
-     call seidel(0,nPoint,Jac(:,:),R(3,:),1.d0,Sol(3,:),Res(:),liniter,convergence)
+     call seidel(0,nPoint,Jac(:,:),R(3,:),1.0,Sol(3,:),Res(:),liniter,convergence)
      if ((convergence .ne. 0) .and. (convergence .ne. 4)) print*, 'Error in p',convergence,ExtIter
      
      do iPoint = 1,nPoint
@@ -58,7 +58,7 @@ logical           :: implicit_time
      
      !--- Time Integration (Explicit) ---!
      else  
-       Res_l2 = 0.d0
+       Res_l2 = 0.0
        do iPoint=1,nPoint
           R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
           P_Correc(iPoint) = P_Correc(iPoint) - R(3,iPoint)*dt_p/Vol(iPoint)

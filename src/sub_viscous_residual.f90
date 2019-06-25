@@ -10,10 +10,10 @@ integer     :: i,j, iPOint, jPoint
   do i=1,Nx
      do j=1,Ny
     iPoint = i + (j-1)*Nx
-    F_e = 0.d0
-    F_w = 0.d0
-    F_n = 0.d0
-    F_s = 0.d0
+    F_e = 0.0
+    F_w = 0.0
+    F_n = 0.0
+    F_s = 0.0
     
     if (i.ne.Nx) then
        !East
