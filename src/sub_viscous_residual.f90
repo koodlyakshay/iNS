@@ -3,6 +3,7 @@
 subroutine viscous_residual
 
 use global_vars
+
 implicit none
 
 integer     :: i,j, iPOint, jPoint

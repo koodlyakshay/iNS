@@ -59,6 +59,7 @@ subroutine left_boundary_flow
 !--- Left (i=1) ---!
 
 use global_vars
+
 implicit none
 
   integer   :: i, j, ipoint
@@ -85,6 +86,7 @@ end subroutine left_boundary_flow
 subroutine right_boundary_flow
 !--- Right (i=Nx) ---!
 use global_vars
+
 implicit none
 
   integer   :: i, j, ipoint

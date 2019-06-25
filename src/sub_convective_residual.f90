@@ -4,10 +4,16 @@
 subroutine convective_residual(upwind, muscl)
 
 use global_vars
+
 implicit none
 
 integer           :: i,j,iPoint,jpoint
 real              :: FaceFlux
+real              :: lambda_i,lambda_j
+real              :: lambda_mean
+real              :: E_0
+real              :: Phi_i
+real              :: Phi_j
 logical           :: upwind, muscl
 
 

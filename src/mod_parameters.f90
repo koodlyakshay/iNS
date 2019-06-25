@@ -16,7 +16,5 @@ integer           :: nMIter
 logical           :: implicit_time
 logical           :: upwind
 logical           :: muscl
-logical           :: restart
-
 
 end module parameters
