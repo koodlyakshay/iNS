@@ -38,6 +38,7 @@ end subroutine allocate_vars
 subroutine initialize_vars
 
 use global_vars
+use flow_parmaters
 
 logical           :: old
 

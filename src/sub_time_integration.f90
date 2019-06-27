@@ -4,6 +4,7 @@ subroutine explicit_euler(miter, nmiter, extiter)
 
 use global_vars
 use output_vars
+use flow_parmaters
 
 implicit none
 
@@ -38,6 +39,7 @@ subroutine implicit_euler(miter, nmiter, extiter)
 
 use global_vars
 use output_vars
+use flow_parmaters
 
 implicit none
 

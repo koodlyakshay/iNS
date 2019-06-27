@@ -4,6 +4,8 @@
 subroutine convective_residual(upwind, muscl)
 
 use global_vars
+use flow_parmaters
+
 
 implicit none
 

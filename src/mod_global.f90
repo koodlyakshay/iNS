@@ -18,14 +18,7 @@ real              :: sc0
 real              :: SF
 
 
-logical           :: restart
-real              :: dt_m
-real              :: dt_p
-real              :: Param_p
-real              :: kappa
-real              :: xmin
-real              :: ymin
-real              :: alfa
+
 
 
 real              :: U_inf

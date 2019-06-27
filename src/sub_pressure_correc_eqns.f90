@@ -2,6 +2,8 @@ subroutine pressure_correc_eqn(npiter, extiter, implicit_time)
 
 use global_vars
 use output_vars
+use flow_parmaters
+
 
 implicit none
 

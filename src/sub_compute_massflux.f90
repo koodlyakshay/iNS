@@ -5,6 +5,7 @@ subroutine compute_massflux(extiter)
 
 use global_vars
 use output_vars
+use flow_parmaters
 
 implicit none
 
