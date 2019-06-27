@@ -17,7 +17,13 @@ real              :: E_0
 real              :: Phi_i
 real              :: Phi_j
 logical           :: upwind, muscl
-
+real              :: sc0
+real              :: SF
+real              :: artvisc = 4.0
+real              :: V_e, V_w, V_n, V_s
+real              :: U_e, U_w, U_n, U_s
+real              :: U_up, V_up
+real              :: F_e(2), F_w(2), F_n(2), F_s(2)
 
 do i=1,Nx
     do j=1,Ny
@@ -277,7 +283,6 @@ do i=1,Nx
        Fc(2,i,j) = F_e(2) + F_w(2) + F_n(2) + F_s(2) ! (rho*V)*U|_e - (rho*V)*U|_w + (rho*V)*V|_n - (rho*V)*V|_s
        
        R(1:2,iPoint) = Fc(1:2,i,j)
-
      enddo
    enddo
 

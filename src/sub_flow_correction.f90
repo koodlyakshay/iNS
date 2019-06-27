@@ -9,6 +9,7 @@ use flow_parmaters
 implicit none
 
 integer     :: i, j, iPoint, jPoint
+real        :: F_e(2), F_w(2), F_n(2), F_s(2)
 
 
    do i=2,Nx-1

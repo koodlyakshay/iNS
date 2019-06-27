@@ -97,7 +97,6 @@ logical           :: old
   P_outlet = 0.0
   Re = (Re_l*U_inf*rho)/mu
   
-  artvisc = 4.0
   CFL = 0.1
   alfa = 0.9
 

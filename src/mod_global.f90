@@ -14,33 +14,16 @@ real              :: dy
 real              :: Area
 real              :: Lx
 real              :: Ly
-real              :: sc0
-real              :: SF
 real              :: U_inf
 real              :: rho
 real              :: mu
 real              :: Re_l
 real              :: P_inf
-real              :: artvisc
 real              :: P_outlet
-real              :: U_e
-real              :: U_w
-real              :: U_n
-real              :: U_s
-real              :: F_e(2)
-real              :: F_w(2)
-real              :: F_n(2)
-real              :: F_s(2)
-real              :: Gr_e
-real              :: Gr_w
-real              :: Gr_n
-real              :: Gr_s
-real              :: V_e
-real              :: V_w
-real              :: V_n
-real              :: V_s
-real              :: U_up
-real              :: V_up
+
+
+
+
 real,allocatable  :: x(:,:)
 real,allocatable  :: y(:,:)
 real,allocatable  :: Mass(:)

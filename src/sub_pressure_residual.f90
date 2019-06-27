@@ -6,6 +6,7 @@ subroutine pressure_residual
  implicit none
  
 integer     :: i, j, iPoint
+real        :: F_e(2), F_w(2), F_n(2), F_s(2)
 
   do i=1,Nx
     do j=1,Ny   

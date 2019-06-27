@@ -61,6 +61,7 @@ real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
     
     Tot_Sol((iPoint-1)*nVar+1) = 0.0
     Tot_Sol((iPoint-1)*nVar+2) = 0.0
+
   enddo
      
    convergence = -2

@@ -14,6 +14,10 @@ integer           :: nPoint
 integer           :: ExtIter
 real              :: GradPi,  GradPav
 real              :: mass_in, mass_out, mass_l2
+real              :: V_e, V_w, V_n, V_s
+real              :: U_e, U_w, U_n, U_s
+real              :: U_up, V_up
+real              :: F_e(2), F_w(2), F_n(2), F_s(2)
 
   nPoint = Nx*Ny
   Mass = 0.0

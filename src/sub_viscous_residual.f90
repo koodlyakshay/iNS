@@ -7,6 +7,9 @@ use global_vars
 implicit none
 
 integer     :: i,j, iPOint, jPoint
+real        :: Gr_e, Gr_w, Gr_n, Gr_s
+real        :: F_e(2), F_w(2), F_n(2), F_s(2)
+
 
   do i=1,Nx
      do j=1,Ny
