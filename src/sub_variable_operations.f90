@@ -34,7 +34,10 @@ real        :: Re
   allocate(GradPc(2,Nx,Ny))
 
 end subroutine allocate_vars
+!=================================================
 
+
+!=================================================
 subroutine initialize_vars
 
 use global_vars

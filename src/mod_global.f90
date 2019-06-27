@@ -16,11 +16,6 @@ real              :: Lx
 real              :: Ly
 real              :: sc0
 real              :: SF
-
-
-
-
-
 real              :: U_inf
 real              :: rho
 real              :: mu
