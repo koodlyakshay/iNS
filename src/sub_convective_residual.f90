@@ -1,15 +1,38 @@
-subroutine convective_residual
+!> \file sub_convective_residual.f90
+!! \brief Subroutine to compute residual contribution from convection terms of the momentum equations.
+
+subroutine convective_residual(upwind, muscl)
 
 use global_vars
+use flow_parmaters
+
+
+implicit none
+
+integer           :: i,j,iPoint,jpoint
+real              :: FaceFlux
+real              :: lambda_i,lambda_j
+real              :: lambda_mean
+real              :: E_0
+real              :: Phi_i
+real              :: Phi_j
+logical           :: upwind, muscl
+real              :: sc0
+real              :: SF
+real              :: artvisc = 4.0
+real              :: V_e, V_w, V_n, V_s
+real              :: U_e, U_w, U_n, U_s
+real              :: U_up, V_up
+real              :: F_e(2), F_w(2), F_n(2), F_s(2)
 
 do i=1,Nx
     do j=1,Ny
     !--- Node definition ---!
     iPoint = i + (j-1)*Nx
-    F_e = 0.d0
-    F_w = 0.d0
-    F_n = 0.d0
-    F_s = 0.d0
+    F_e = 0.0
+    F_w = 0.0
+    F_n = 0.0
+    F_s = 0.0
     if (i.ne.Nx) then
        !--- Compute flux and update Jacobians ---!
        !East 
@@ -17,9 +40,9 @@ do i=1,Nx
        U_e = 0.5*( U_old(1,iPoint) + U_old(1,jPoint))
        V_e = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        FaceFlux = rho*U_e*dy
-       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_e*dy/2.d0
+       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_e*dy/2.0
        if (upwind) then
-         if (FaceFlux .gt. 0.d0) then
+         if (FaceFlux .gt. 0.0) then
            U_up = U_old(1,iPoint)
            V_up = U_old(2,iPoint)
            if (muscl) then
@@ -40,24 +63,24 @@ do i=1,Nx
        F_e(1) = rho*U_e*U_e*dy          ! (rho*U)*U|_e
        F_e(2) = rho*V_e*U_e*dy          ! (rho*V)*U|_e
        endif
-       lambda_i = abs(2.d0*U_old(1,iPoint)*dy)
-       lambda_j = abs(2.d0*U_old(1,jPoint)*dy)
+       lambda_i = abs(2.0*U_old(1,iPoint)*dy)
+       lambda_j = abs(2.0*U_old(1,jPoint)*dy)
        
        lambda_mean = 0.5*(lambda_i + lambda_j)
-       if (lambda_mean .eq. 0.d0) then
+       if (lambda_mean .eq. 0.0) then
         lambda_i = abs(U_old(1,iPoint)*dy) + sqrt(U_old(1,iPoint)*U_old(1,iPoint)*dy*dy + (artvisc/rho)*dy*dy) 
         lambda_j = abs(U_old(1,jPoint)*dy) + sqrt(U_old(1,jPoint)*U_old(1,jPoint)*dy*dy + (artvisc/rho)*dy*dy) 
         lambda_mean = 0.5*(lambda_i + lambda_j)
        endif
-       Phi_i = (lambda_i/(4.d0*lambda_mean))**Param_p
-       Phi_j = (lambda_j/(4.d0*lambda_mean))**Param_p
-       if ((Phi_i + Phi_j).eq.0.d0) then
-           SF = 0.d0
+       Phi_i = (lambda_i/(4.0*lambda_mean))**Param_p
+       Phi_j = (lambda_j/(4.0*lambda_mean))**Param_p
+       if ((Phi_i + Phi_j).eq.0.0) then
+           SF = 0.0
        else 
-           SF = 4.d0*Phi_i*Phi_j/(Phi_i + Phi_j)
+           SF = 4.0*Phi_i*Phi_j/(Phi_i + Phi_j)
        endif
-       sc0 = 3.d0*(4.d0+4.d0)/(4.d0*4.d0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
-       E_0 = kappa*sc0*2.d0/3.d0
+       sc0 = 3.0*(4.0+4.0)/(4.0*4.0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
+       E_0 = kappa*sc0*2.0/3.0
        F_e(1) = F_e(1) + E_0*(U_old(1,iPoint) - U_old(1,jPoint))*SF*lambda_mean
        F_e(2) = F_e(2) + E_0*(U_old(2,iPoint) - U_old(2,jPoint))*SF*lambda_mean
        
@@ -79,8 +102,8 @@ do i=1,Nx
        V_w = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*U_w*dy
-       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_w*dy/2.d0
-       if (FaceFlux .gt. 0.d0) then
+       if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_w*dy/2.0
+       if (FaceFlux .gt. 0.0) then
           U_up = U_old(1,jPoint)
           V_up = U_old(2,jPoint)
           if (muscl) then
@@ -101,24 +124,24 @@ do i=1,Nx
        F_w(1) = -rho*U_w*U_w*dy          ! (rho*U)*U|_w
        F_w(2) = -rho*V_w*U_w*dy          ! (rho*U)*V|_w
        endif
-       lambda_i = abs(2.d0*U_old(1,iPoint)*dy)
-       lambda_j = abs(2.d0*U_old(1,jPoint)*dy)
+       lambda_i = abs(2.0*U_old(1,iPoint)*dy)
+       lambda_j = abs(2.0*U_old(1,jPoint)*dy)
        
        lambda_mean = 0.5*(lambda_i + lambda_j)
-       if (lambda_mean .eq. 0.d0) then
+       if (lambda_mean .eq. 0.0) then
         lambda_i = abs(U_old(1,iPoint)*dy) + sqrt(U_old(1,iPoint)*U_old(1,iPoint)*dy*dy + (artvisc/rho)*dy*dy) 
         lambda_j = abs(U_old(1,jPoint)*dy) + sqrt(U_old(1,jPoint)*U_old(1,jPoint)*dy*dy + (artvisc/rho)*dy*dy) 
         lambda_mean = 0.5*(lambda_i + lambda_j)
        endif
-       Phi_i = (lambda_i/(4.d0*lambda_mean))**Param_p
-       Phi_j = (lambda_j/(4.d0*lambda_mean))**Param_p
-       if ((Phi_i + Phi_j).eq.0.d0) then 
-           SF = 0.d0
+       Phi_i = (lambda_i/(4.0*lambda_mean))**Param_p
+       Phi_j = (lambda_j/(4.0*lambda_mean))**Param_p
+       if ((Phi_i + Phi_j).eq.0.0) then 
+           SF = 0.0
        else 
-            SF = 4.d0*Phi_i*Phi_j/(Phi_i + Phi_j)
+            SF = 4.0*Phi_i*Phi_j/(Phi_i + Phi_j)
        endif
-       sc0 = 3.d0*(4.d0+4.d0)/(4.d0*4.d0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
-       E_0 = kappa*sc0*2.d0/3.d0
+       sc0 = 3.0*(4.0+4.0)/(4.0*4.0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
+       E_0 = kappa*sc0*2.0/3.0
        F_w(1) = F_w(1) + E_0*(U_old(1,iPoint) - U_old(1,jPoint))*SF*lambda_mean
        F_w(2) = F_w(2) + E_0*(U_old(2,iPoint) - U_old(2,jPoint))*SF*lambda_mean
        
@@ -140,8 +163,8 @@ do i=1,Nx
        V_n = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*V_n*dx
-       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_n*dx/2.d0
-       if (FaceFlux .gt. 0.d0) then
+       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_n*dx/2.0
+       if (FaceFlux .gt. 0.0) then
          U_up = U_old(1,iPoint)
          V_up = U_old(2,iPoint)
          if (muscl) then
@@ -162,24 +185,24 @@ do i=1,Nx
        F_n(1) = rho*V_n*U_n*dx          ! (rho*V)*U|_n
        F_n(2) = rho*V_n*V_n*dx          ! (rho*V)*V|_n
        endif
-       lambda_i = abs(2.d0*U_old(2,iPoint)*dx)
-       lambda_j = abs(2.d0*U_old(2,jPoint)*dx)
+       lambda_i = abs(2.0*U_old(2,iPoint)*dx)
+       lambda_j = abs(2.0*U_old(2,jPoint)*dx)
        
        lambda_mean = 0.5*(lambda_i + lambda_j)
-       if (lambda_mean .eq. 0.d0) then
+       if (lambda_mean .eq. 0.0) then
         lambda_i = abs(U_old(2,iPoint)*dx) + sqrt(U_old(2,iPoint)*U_old(2,iPoint)*dx*dx + (artvisc/rho)*dx*dx) 
         lambda_j = abs(U_old(2,jPoint)*dx) + sqrt(U_old(2,jPoint)*U_old(2,jPoint)*dx*dx + (artvisc/rho)*dx*dx)
         lambda_mean = 0.5*(lambda_i + lambda_j)
        endif
-       Phi_i = (lambda_i/(4.d0*lambda_mean))**Param_p
-       Phi_j = (lambda_j/(4.d0*lambda_mean))**Param_p
-       if ((Phi_i + Phi_j).eq.0.d0) then 
-           SF = 0.d0
+       Phi_i = (lambda_i/(4.0*lambda_mean))**Param_p
+       Phi_j = (lambda_j/(4.0*lambda_mean))**Param_p
+       if ((Phi_i + Phi_j).eq.0.0) then 
+           SF = 0.0
        else 
-            SF = 4.d0*Phi_i*Phi_j/(Phi_i + Phi_j)
+            SF = 4.0*Phi_i*Phi_j/(Phi_i + Phi_j)
        endif
-       sc0 = 3.d0*(4.d0+4.d0)/(4.d0*4.d0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
-       E_0 = kappa*sc0*2.d0/3.d0
+       sc0 = 3.0*(4.0+4.0)/(4.0*4.0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
+       E_0 = kappa*sc0*2.0/3.0
        F_n(1) = F_n(1) + E_0*(U_old(1,iPoint) - U_old(1,jPoint))*SF*lambda_mean
        F_n(2) = F_n(2) + E_0*(U_old(2,iPoint) - U_old(2,jPoint))*SF*lambda_mean
        
@@ -201,8 +224,8 @@ do i=1,Nx
        V_s = 0.5*( U_old(2,iPoint) + U_old(2,jPoint))
        if (upwind) then
        FaceFlux = rho*V_s*dx
-       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_s*dx/2.d0
-       if (FaceFlux .gt. 0.d0) then
+       if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_s*dx/2.0
+       if (FaceFlux .gt. 0.0) then
          U_up = U_old(1,jPoint)
          V_up = U_old(2,jPoint)
          if (muscl) then
@@ -223,24 +246,24 @@ do i=1,Nx
        F_s(1) = -rho*V_s*U_s*dx          ! (rho*V)*U|_s
        F_s(2) = -rho*V_s*V_s*dx          ! (rho*V)*V|_s
        endif
-       lambda_i = abs(2.d0*U_old(2,iPoint)*dx)
-       lambda_j = abs(2.d0*U_old(2,jPoint)*dx)
+       lambda_i = abs(2.0*U_old(2,iPoint)*dx)
+       lambda_j = abs(2.0*U_old(2,jPoint)*dx)
        
        lambda_mean = 0.5*(lambda_i + lambda_j)
-       if (lambda_mean .eq. 0.d0) then
+       if (lambda_mean .eq. 0.0) then
         lambda_i = abs(U_old(2,iPoint)*dx) + sqrt(U_old(2,iPoint)*U_old(2,iPoint)*dx*dx + (artvisc/rho)*dx*dx) 
         lambda_j = abs(U_old(2,jPoint)*dx) + sqrt(U_old(2,jPoint)*U_old(2,jPoint)*dx*dx + (artvisc/rho)*dx*dx)
         lambda_mean = 0.5*(lambda_i + lambda_j)
        endif
-       Phi_i = (lambda_i/(4.d0*lambda_mean))**Param_p
-       Phi_j = (lambda_j/(4.d0*lambda_mean))**Param_p
-       if ((Phi_i + Phi_j).eq.0.d0) then 
-           SF = 0.d0
+       Phi_i = (lambda_i/(4.0*lambda_mean))**Param_p
+       Phi_j = (lambda_j/(4.0*lambda_mean))**Param_p
+       if ((Phi_i + Phi_j).eq.0.0) then 
+           SF = 0.0
        else 
-            SF = 4.d0*Phi_i*Phi_j/(Phi_i + Phi_j)
+            SF = 4.0*Phi_i*Phi_j/(Phi_i + Phi_j)
        endif
-       sc0 = 3.d0*(4.d0+4.d0)/(4.d0*4.d0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
-       E_0 = kappa*sc0*2.d0/3.d0
+       sc0 = 3.0*(4.0+4.0)/(4.0*4.0)  ! (Neighbor_i + Neighbor_j)/(Neighbor_i*Neighbor_j)
+       E_0 = kappa*sc0*2.0/3.0
        F_s(1) = F_s(1) + E_0*(U_old(1,iPoint) - U_old(1,jPoint))*SF*lambda_mean
        F_s(2) = F_s(2) + E_0*(U_old(2,iPoint) - U_old(2,jPoint))*SF*lambda_mean
        
@@ -260,14 +283,6 @@ do i=1,Nx
        Fc(2,i,j) = F_e(2) + F_w(2) + F_n(2) + F_s(2) ! (rho*V)*U|_e - (rho*V)*U|_w + (rho*V)*V|_n - (rho*V)*V|_s
        
        R(1:2,iPoint) = Fc(1:2,i,j)
-       
-       if (wrt_data .eq. 1) then
-       write(16,*)x(i,j),y(i,j),F_e(1:2),U_e,V_e
-       write(16,*)x(i,j),y(i,j),F_w(1:2),U_w,V_w
-       write(16,*)x(i,j),y(i,j),F_n(1:2),U_n,V_n
-       write(16,*)x(i,j),y(i,j),F_s(1:2),U_s,V_s
-       write(16,*)
-       endif
      enddo
    enddo
 

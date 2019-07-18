@@ -1,9 +1,17 @@
+!> \file sub_linear_algebra.f90
+!! \brief File with linear solver and other matrix related operations.
+
+!!seidel(0,nPoint*nVar,Mat,Tot_R(:),1.0,Tot_Sol(:),Res(:),liniter,convergence)
+
 subroutine seidel(crit,n,mat,b,omega,x,residu,iter,rc)
-parameter(ITERMAX=5000)            ! Maximal number of iterations
-parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
-  integer crit, n, iter, rc
-  REAL*8 mat(n,n),b(n),omega
-  REAL*8 x(n),residu(n)
+implicit none
+
+integer, parameter    :: ITERMAX=10            ! Maximal number of iterations
+real, parameter       :: ONE=1.0, TWO=2.0, ZERO=0.0
+integer               :: crit, n, iter, rc
+integer               :: i, j
+REAL                  :: mat(n,n),b(n),omega
+REAL                  :: x(n),residu(n)
 !*====================================================================*
 !*                                                                    *
 !*  seidel solves the linear system  mat * x = b  iteratively.        *
@@ -65,7 +73,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
 !*               = 13     Schmidt-v.Mises criterion violated          *
 !*                                                                    *
 !*====================================================================*
-  REAL*8 tmp, eps;
+REAL      :: tmp, eps;
 
    rc = 0                       
    iter = 0 !Initialize iteration counter
@@ -96,7 +104,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
      do i = 1, n                  !row sum criterion
        tmp=ZERO
        do j=1,n
-         tmp = tmp + dabs(mat(i,j))
+         tmp = tmp + abs(mat(i,j))
        end do
        if (tmp >= TWO) then
          rc=11
@@ -107,7 +115,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
      do j=1, n                    !column sum criterion
 	   tmp=ZERO
        do i=1,n
-         tmp = tmp + dabs(mat(i,j))
+         tmp = tmp + abs(mat(i,j))
        end do
        if (tmp >= TWO) then
          rc=12
@@ -121,7 +129,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
          tmp = tmp + mat(i,j)**2  !von Mises
        end do
      end do
-     tmp = DSQRT(tmp - ONE)
+     tmp = SQRT(tmp - ONE)
      if (tmp >= ONE) then
        rc=13
        return
@@ -147,7 +155,7 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
 
     do i=1, n                     !check break-off criterion
       tmp = x(i) - residu(i)
-      if (DABS (tmp) <= eps) then
+      if (ABS (tmp) <= eps) then
         x(i) = residu(i)          !If rc = 0 at end of loop
         rc = 0                    !  -> stop iteration
       else
@@ -172,3 +180,15 @@ parameter(ONE=1.d0,TWO=2.d0,ZERO=0.d0)
   return
 
 end
+
+
+subroutine AddTotJac()
+
+
+end subroutine AddTotJac
+
+
+subroutine SubtractTotJac()
+
+
+end subroutine SubtractTotJac

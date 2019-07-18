@@ -1,15 +1,23 @@
+!> \file sub_viscous_residual.f90
+!! \brief Subroutine to compute the viscous contribution to the residual for the momentum equations.
 subroutine viscous_residual
 
 use global_vars
+
+implicit none
+
+integer     :: i,j, iPOint, jPoint
+real        :: Gr_e, Gr_w, Gr_n, Gr_s
+real        :: F_e(2), F_w(2), F_n(2), F_s(2)
 
 
   do i=1,Nx
      do j=1,Ny
     iPoint = i + (j-1)*Nx
-    F_e = 0.d0
-    F_w = 0.d0
-    F_n = 0.d0
-    F_s = 0.d0
+    F_e = 0.0
+    F_w = 0.0
+    F_n = 0.0
+    F_s = 0.0
     
     if (i.ne.Nx) then
        !East
@@ -39,15 +47,6 @@ use global_vars
        Gr_s = 2.0*0.5*( GradU(2,2,i,j-1) + GradU(2,2,i,j)) 
        F_s(2) = -mu*Gr_s*dx ! dv/dy|_s
     endif       
-       
-       
-       if(wrt_data .eq. 1) then
-       write(17,*)F_e(1:2),'iPoint',iPoint,'jPoint',i+1 + (j-1)*Nx,Gr_e
-       write(17,*)F_w(1:2),'iPoint',iPoint,'jPoint',i-1 + (j-1)*Nx,Gr_w
-       write(17,*)F_n(1:2),'iPoint',iPoint,'jPoint',i + (j+1-1)*Nx,Gr_n
-       write(17,*)F_s(1:2),'iPoint',iPoint,'jPoint',i + (j-1-1)*Nx,Gr_s
-       write(17,*)
-       endif
        
        !--- Update Jacobians ---!
     if (i.ne.Nx) then
