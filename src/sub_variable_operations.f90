@@ -7,7 +7,6 @@ use global_vars
 implicit none
 
 integer     :: nPoint
-real        :: CFL
 real        :: Re
 
   nPoint = Nx*Ny
@@ -17,6 +16,7 @@ real        :: Re
   allocate(y(Nx,Ny))
   allocate(P(Nx,Ny))
   allocate(Vol(nPoint))
+  allocate(dt_m(nPoint))
   allocate(U(2,Nx*Ny))
   allocate(U_old(2,Nx*Ny))
   allocate(Sol(3,Nx*Ny))
@@ -31,6 +31,8 @@ real        :: Re
   allocate(Res(Nx*Ny*nVar))
   allocate(Mass(Nx*Ny),D(2,Nx*Ny))
   allocate(Tot_Jac(Nx*Ny*nVar,Nx*Ny*nVar))
+  allocate(Visc_Jac(Nx*Ny*nVar,Nx*Ny*nVar))
+  allocate(Convec_Jac(Nx*Ny*nVar,Nx*Ny*nVar))
   allocate(GradPc(2,Nx,Ny))
 
 end subroutine allocate_vars
@@ -59,7 +61,7 @@ logical           :: old
    enddo
   enddo
 
-!First set everything to 0.5dx * 0.5 dy (the lowest)
+!First set everything to 0.5dx * 0.5dy (the lowest)
   Vol(:) = 0.25*dx*dy
 !Change the interior points so only boundary points have the old value
   do i=2,Nx-1
@@ -93,11 +95,9 @@ logical           :: old
   enddo
 
 !--- Flow defintion ---!
-  Re_l = 0.25
   P_outlet = 0.0
   Re = (Re_l*U_inf*rho)/mu
   
-  CFL = 0.1
   alfa = 0.9
 
 !--- Initialize variables ---!
@@ -121,8 +121,7 @@ logical           :: old
   if (restart) call read_restart
   
   open(unit=10,file='../out/Solver_details.txt',status='unknown')
-  write(10,*)'CFL_m: ',U_inf*dt_m/min(dx,dy)
-  write(10,*)'CFL_p: ',U_inf*dt_p/min(dx,dy)
+  write(10,*)'CFL: ',cfl
   write(10,*)'Re: ',Re
   write(10,*)'dx: ',dx
   write(10,*)'dy: ',dy
@@ -148,6 +147,7 @@ use global_vars
   deallocate(y)
   deallocate(P)
   deallocate(Vol)
+  deallocate(dt_m)
   deallocate(U)
   deallocate(U_old)
   deallocate(Sol)
@@ -161,6 +161,8 @@ use global_vars
   deallocate(GradU)
   deallocate(Res)
   deallocate(Mass,D)
+  deallocate(Convec_Jac)
+  deallocate(Visc_Jac)
   deallocate(Tot_Jac)
   deallocate(GradPc)
 

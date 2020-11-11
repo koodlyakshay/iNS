@@ -54,60 +54,60 @@ real        :: F_e(2), F_w(2), F_n(2), F_s(2)
        jPoint = i+1 + (j-1)*Nx
        
        !print*,iPoint,jPoint,F_e,1.0*mu*area/dx,'ve',x(i,j),y(i,j) 
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) - mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) - 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) - 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) =- mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) =- 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) =- 0.5*mu*area/dx
        
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 0.5*mu*area/dx
     endif
     if (i.ne.1) then
        !West
        jPoint = i-1 + (j-1)*Nx
        
        !print*,iPoint,jPoint,F_w,1.0*mu*area/dx,'vw',x(i,j),y(i,j)
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) - mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) - 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) - 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) =- mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) =- 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) =- 0.5*mu*area/dx
        
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = 0.5*mu*area/dx
     endif   
     if (j.ne.Ny) then
        !North
        jPoint = i + (j+1-1)*Nx
        
        !print*,iPoint,jPoint,F_n,1.0*mu*area/dx,'vn',x(i,j),y(i,j)
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) - 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) - mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) =- 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) =- mu*area/dx
        
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = mu*area/dx
     endif   
     if (j.ne.1) then
        !South
        jPoint = i + (j-1-1)*Nx
        
        !print*,iPoint,jPoint,F_s,1.0*mu*area/dx,'vs',x(i,j),y(i,j)
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) - 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) - 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) - mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+1) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(jPoint-1)*nVar+2) =- 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+1) =- 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(jPoint-1)*nVar+2) =- mu*area/dx
        
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) + 0.5*mu*area/dx
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) + 0.0
-       Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) + mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+2) = 0.5*mu*area/dx
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+1) = 0.0
+       Visc_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = mu*area/dx
     endif
     
      !--- Update residuals ---!

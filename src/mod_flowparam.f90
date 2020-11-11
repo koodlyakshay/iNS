@@ -3,8 +3,7 @@ module flow_parmaters
 implicit none
 
 logical           :: restart
-real              :: dt_m
-real              :: dt_p
+real              :: cfl
 real              :: Param_p
 real              :: kappa
 real              :: xmin

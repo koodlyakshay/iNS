@@ -19,8 +19,9 @@ implicit none
 
 
 namelist            /grid/ Lx,Ly,Nx,Ny,xmin,ymin
-namelist            /solver/ implicit_time,upwind,muscl,nExtIter,nPIter,nMIter,p_screen1,p_screen2,p_out,file_out,restart,p_rest
-namelist            /numerics/ kappa,Param_p,dt_m,dt_p
+namelist            /solver/ implicit_time,upwind,muscl,nExtIter
+namelist            /io/ p_screen1,p_screen2,p_out,file_out,restart,p_rest,file_rest
+namelist            /numerics/ kappa,Param_p,cfl
 namelist            /flow/ U_inf,rho,mu,Re_l,P_inf
 
 character(len=100)   :: filename
@@ -38,6 +39,8 @@ character(len=100)   :: filename
   read(16, nml=grid)
   
   read(16, nml=solver)
+  
+  read(16, nml=io)
   
   read(16, nml=numerics)
   

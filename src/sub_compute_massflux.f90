@@ -68,28 +68,28 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    j=1
    do i=2,Nx-1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
        !East 
        jPoint = i+1 + (j-1)*Nx
        U_e = 0.5*( U(1,iPoint) + U(1,jPoint))
        GradPi = 0.5*(GradU(3,1,i+1,j) + GradU(3,1,i,j))
        GradPav = (P(i+1,j) - P(i,j))/dx
-       F_e(1) = rho*U_e*dy/2.0 + 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy/2.0
+       F_e(1) = rho*U_e*dy/2.0 + 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy/2.0
        
        !West
        jPoint = i-1 + (j-1)*Nx
        U_w = 0.5*( U(1,jPoint) + U(1,iPoint))
        GradPi = 0.5*(GradU(3,1,i,j) + GradU(3,1,i-1,j))
        GradPav = (P(i,j) - P(i-1,j))/dx
-       F_w(1) = -rho*U_w*dy/2.0 - 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy/2.0
+       F_w(1) = -rho*U_w*dy/2.0 - 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy/2.0
        
        !North 
        jPoint = i + (j+1-1)*Nx
        V_n = 0.5*( U(2,iPoint) + U(2,jPoint))
        GradPi = 0.5*(GradU(3,2,i,j+1) + GradU(3,2,i,j))
        GradPav = (P(i,j+1) - P(i,j))/dy
-       F_n(1) = rho*V_n*dx + 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx
+       F_n(1) = rho*V_n*dx + 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx
        
        !South
        F_s(1) = 0.0
@@ -101,14 +101,14 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=1
    do j=2,Ny-1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
       !East 
        jPoint = i+1 + (j-1)*Nx
        U_e = 0.5*( U(1,iPoint) + U(1,jPoint))
        GradPi = 0.5*(GradU(3,1,i+1,j) + GradU(3,1,i,j))
        GradPav = (P(i+1,j) - P(i,j))/dx
-       F_e(1) = rho*U_e*dy + 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy
+       F_e(1) = rho*U_e*dy + 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dy
        
        !West
        F_w(1) = -rho*U(1,iPoint)*dy
@@ -118,14 +118,14 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
        V_n = 0.5*( U(2,iPoint) + U(2,jPoint))
        GradPi = 0.5*(GradU(3,2,i,j+1) + GradU(3,2,i,j))
        GradPav = (P(i,j+1) - P(i,j))/dy
-       F_n(1) = rho*V_n*dx/2.0 + 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+       F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
        
        !South
        jPoint = i + (j-1-1)*Nx
        V_s = 0.5*( U(2,jPoint) + U(2,iPoint))
        GradPi = 0.5*(GradU(3,2,i,j) + GradU(3,2,i,j-1))
        GradPav = (P(i,j) - P(i,j-1))/dy
-       F_s(1) = -rho*V_s*dx/2.0 - 0.5*(0.5*D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+       F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
        
               
      Mass(iPoint) = F_e(1) + F_w(1) + F_n(1) + F_s(1)
@@ -136,8 +136,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=Nx
    do j=2,Ny-1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
        !East(Outlet face)
        jPoint = i+1 + (j-1)*Nx
        U_e =  U(1,iPoint)
@@ -157,14 +157,14 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
        V_n = 0.5*( U(2,iPoint) + U(2,jPoint))
        GradPi = 0.5*(GradU(3,2,i,j+1) + GradU(3,2,i,j))
        GradPav = (P(i,j+1) - P(i,j))/dy
-       F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+       F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
        
        !South
        jPoint = i + (j-1-1)*Nx
        V_s = 0.5*( U(2,jPoint) + U(2,iPoint))
        GradPi = 0.5*(GradU(3,2,i,j) + GradU(3,2,i,j-1))
        GradPav = (P(i,j) - P(i,j-1))/dy
-       F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+       F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
                      
      Mass(iPoint) = F_e(1) + F_w(1) + F_n(1) + F_s(1)
      mass_out = mass_out + F_e(1)
@@ -174,8 +174,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    j=Ny
    do i=2,Nx-1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
       !East 
        jPoint = i+1 + (j-1)*Nx
        U_e = 0.5*( U(1,iPoint) + U(1,jPoint))
@@ -198,7 +198,7 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
        V_s = 0.5*( U(2,jPoint) + U(2,iPoint))
        GradPi = 0.5*(GradU(3,2,i,j) + GradU(3,2,i,j-1))
        GradPav = (P(i,j) - P(i,j-1))/dy
-       F_s(1) = -rho*V_s*dx - 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx
+       F_s(1) = -rho*V_s*dx - 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx
                      
      Mass(iPoint) = F_e(1) + F_w(1) + F_n(1) + F_s(1)
    enddo
@@ -208,8 +208,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=1
    j=1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
    !East
    jPoint = i+1 + (j-1)*Nx
    U_e = 0.5*( U(1,iPoint) + U(1,jPoint))
@@ -222,7 +222,7 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    V_n = 0.5*( U(2,iPoint) + U(2,jPoint))
    GradPi = 0.5*(GradU(3,2,i,j+1) + GradU(3,2,i,j))
    GradPav = (P(i,j+1) - P(i,j))/dy
-   F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+   F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
        
     Mass(iPoint) = F_e(1) + F_n(1) - rho*U(1,iPoint)*dy/2.0 !Contribution from inlet
     mass_in = mass_in  - rho*U(1,iPoint)*dy/2.0
@@ -230,8 +230,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=1
    j=Ny
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
    !East
    jPoint = i+1 + (j-1)*Nx
    U_e = 0.5*( U(1,iPoint) + U(1,jPoint))
@@ -244,7 +244,7 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    V_s = 0.5*( U(2,iPoint) + U(2,jPoint))
    GradPi = 0.5*(GradU(3,2,i,j-1) + GradU(3,2,i,j))
    GradPav = (P(i,j) - P(i,j-1))/dy
-   F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+   F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
 
     Mass(iPoint) = F_e(1) + F_s(1) - rho*U(1,iPoint)*dy/2.0 !Contribution from inlet
     mass_in = mass_in  - rho*U(1,iPoint)*dy/2.0
@@ -253,8 +253,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=Nx
    j=Ny
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
    !East (Outlet face)
    jPoint = i+1 + (j-1)*Nx
    U_e =  U(1,iPoint)
@@ -274,7 +274,7 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    V_s = 0.5*( U(2,iPoint) + U(2,jPoint))
    GradPi = 0.5*(GradU(3,2,i,j-1) + GradU(3,2,i,j))
    GradPav = (P(i,j) - P(i,j-1))/dy
-   F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+   F_s(1) = -rho*V_s*dx/2.0 - 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
     
    Mass(iPoint) = F_w(1) + F_s(1) + F_e(1)
    mass_out = mass_out  + F_e(1)
@@ -282,8 +282,8 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    i=Nx
    j=1
    iPoint = i + (j-1)*Nx
-   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m)
-   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m)
+   Tot_Jac((iPoint-1)*nVar+1,(iPoint-1)*nVar+1) = Vol(iPoint)/(alfa*dt_m(iPoint))
+   Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2) = Vol(iPoint)/(alfa*dt_m(iPoint))
    !East(Outlet face)
    jPoint = i+1 + (j-1)*Nx
    U_e =  U(1,iPoint)
@@ -303,7 +303,7 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
    V_n = 0.5*( U(2,iPoint) + U(2,jPoint))
    GradPi = 0.5*(GradU(3,2,i,j+1) + GradU(3,2,i,j))
    GradPav = (P(i,j+1) - P(i,j))/dy
-   F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(1,iPoint)+D(1,jPoint))*(GradPi - GradPav)*dx/2.0
+   F_n(1) = rho*V_n*dx/2.0 + 0.5*(D(2,iPoint)+D(2,jPoint))*(GradPi - GradPav)*dx/2.0
 
     
    Mass(iPoint) = F_w(1) + F_n(1) + F_e(1)
@@ -312,17 +312,22 @@ real              :: F_e(2), F_w(2), F_n(2), F_s(2)
 
    mass_l2 = 0.0
 
+   !open(unit=11,file='test.txt',status='unknown')
    do i=1,Nx
      do j=1,Ny
       iPoint = i+ (j-1)*Nx
       mass_l2 = mass_l2 + Mass(iPoint)**2.0
+      !write(11,*) iPoint, Mass(iPoint)
      enddo
    enddo
+   
    
    mass_l2 = sqrt(mass_l2/nPoint)
    if (modulo(ExtIter,p_out) .eq. 0) then 
      print*,'Mass: ',log10(mass_l2),ExtIter,'Net mass: ',mass_in + mass_out
      print*
    endif
+   !close(11)
+   !stop
 
 end subroutine compute_massflux

@@ -1,38 +1,56 @@
 &grid
- Lx = 1.0                     ! domain size in x-direction
- Ly = 0.125                   ! domain size in y-direction
- Nx = 41                      ! maximum grid points in x-direction
- Ny = 32                      ! maximum grid points in x-direction
- xmin =-0.01                  ! starting point of the grid in x-axis
- ymin = -0.01                 ! starting point of the grid in y-axis
+! domain size in x-direction
+ Lx = 0.5
+! domain size in y-direction
+ Ly = 0.0625
+! maximum grid points in x-direction
+ Nx = 21
+! maximum grid points in x-direction
+ Ny = 30
+! starting point of the grid in x-axis
+ xmin =-0.01
+! starting point of the grid in y-axis
+ ymin = -0.01                 
 /
 
 &solver 
- implicit_time = .true.       ! implicit time integration (or not)
- upwind = .true.              ! upwind or central scheme
- muscl = .true.               ! true=2nd order, false=1st order
- nExtIter = 200              ! nr. of external iterations
- nMIter = 2                   ! nr. of iterations for the momentum eqautions
- nPIter = 2                   ! nr. of iterations for Poisson solver
- p_screen1 = 100              ! frequency of screen output
- p_screen2 = 100              ! frequency of screen output
- p_out = 50                   ! frequency of output files 
- file_out = 'flow_imp'        ! output file name
- restart = .false.             ! read from restart file
- p_rest = 50                  ! frequency of restart files
+! implicit time integration (or not)
+ implicit_time = .true.
+! upwind or central scheme
+ upwind = .true.
+! true=2nd order, false=1st order 
+ muscl = .true.
+! nr. of external iterations
+ nExtIter = 15000
+/
+
+&io
+! frequency of screen output
+ p_screen1 = 100
+! frequency of screen output
+ p_screen2 = 100
+! frequency of output files
+ p_out = 100
+! output file name
+ file_out = 'flow_up2'
+! read from restart file
+ restart = .false.
+! frequency of restart files
+ p_rest = 250
+! restart file name (extension is always .dat and ASCII)
+ file_rest = 'restart_flow_up2'
 /
 
 &numerics
  Param_p = 0.3
- kappa = 0.0e-0
- dt_m = 3.0e-3
- dt_p = 3.0e-3
+ kappa = 0.1
+ cfl = 0.05
 /
 
 &flow 
  U_inf = 1.0
  rho = 1.0
  mu = 2.5e-3
- Re_l = 0.25
+ Re_l = 0.0625
  P_inf = 0.0
 /

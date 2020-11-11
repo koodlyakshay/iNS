@@ -49,33 +49,32 @@ call initialize_vars
 
 do ExtIter = 1,nExtIter
 
-!---------------------- Solve momentum equation -----------------------!
+  !---------------------- Solve momentum equation -----------------------!
 
-call momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
+  call momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
 
-!--- Compute residual mass flux from vel solution ---!
-call compute_massflux(extiter)
+  !--- Compute residual mass flux from vel solution ---!
+  call compute_massflux(extiter)
 
-!---------------- Solve pressure corrrection equation -----------------!
+  !---------------- Solve pressure corrrection equation -----------------!
 
-call pressure_correc_eqn(nPIter, extiter, implicit_time)
+  call pressure_correc_eqn(nPIter, extiter, implicit_time)
 
-!--- Correct pressure and velocities ---!
+  !--- Correct pressure and velocities ---!
   
-call sub_flow_correction
+  call sub_flow_correction
 
-!--- Convergence monitoring ---!
-   
+  !--- Convergence monitoring ---!
 
-!--- Output solution ---!
+  !--- Output solution ---!
 
-if (modulo(ExtIter,p_out) .eq. 0) then
-     call sub_output
-endif
+  if (modulo(ExtIter,p_out) .eq. 0) then
+    call sub_output
+  endif
 
-if (modulo(ExtIter,p_rest) .eq. 0) then
-     call write_restart
-endif
+  if (modulo(ExtIter,p_rest) .eq. 0) then
+    call write_restart
+  endif
 
 
 enddo !ExtIter

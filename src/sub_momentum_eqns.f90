@@ -9,7 +9,6 @@ integer     :: ExtIter, miter, nmiter
 logical     :: implicit_time, upwind, muscl
 
 !----------------------------------------------------------------------!
-  do MIter = 1,nMIter
    !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
    call preprocessing_flow
       
@@ -40,17 +39,13 @@ logical     :: implicit_time, upwind, muscl
    call upper_boundary_flow
    
    if (implicit_time) then
-   !--- Time Integration (Implicit) ---!
-   call implicit_euler(miter, nmiter, extiter)
-   
+     !--- Time Integration (Implicit) ---!
+     call implicit_euler(miter, nmiter, extiter)
    else   
-   !--- Time Integration (Explicit) ---!
-   call explicit_euler(miter, nmiter, extiter)
-     
+     !--- Time Integration (Explicit) ---!
+     call explicit_euler(miter, nmiter, extiter)
    endif
    
-enddo   !MIter
-
 
 end subroutine momentum_eqns
 

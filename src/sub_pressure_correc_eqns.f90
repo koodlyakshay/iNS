@@ -19,62 +19,35 @@ logical           :: implicit_time
   Sol(3,:) = 0.0
   P_Correc = 0.0
   GradPc = 0.0
-  liniter = 0
-  
-  do PIter = 1,nPIter
-  
-     R(3,:) = 0.0  
+  liniter = 0 
+  R(3,:) = 0.0  
      
-     !--- Compute pressure correction gradient ---!
-     call compute_pcgradientgg
-     
-     !--- Compute residual for the pressure correction equation ---!
-     call compute_pcresidual
-  
-     call boundary_conditions
-     
-        
-     if (implicit_time) then
-     
-     Res_l2 = 0.0
+  !--- Compute residual for the pressure correction equation ---!
+  call compute_pcresidual
 
-     do iPoint=1,nPoint
-       R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
-       R(3,iPoint) = -R(3,iPoint)
-       
-       Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + Vol(iPoint)/dt_p
-            
-       Res_l2 = Res_l2 + R(3,iPoint)**2.0
-     enddo
-  
-     Res_l2 = sqrt(Res_l2/nPoint)
-     if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
-        
-     !--- Solve pressure correction equation ---!
-     call seidel(0,nPoint,Jac(:,:),R(3,:),1.0,Sol(3,:),Res(:),liniter,convergence)
-     if ((convergence .ne. 0) .and. (convergence .ne. 4)) print*, 'Error in p',convergence,ExtIter
-     
-     do iPoint = 1,nPoint
-       P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
-     enddo
-     
-     !--- Time Integration (Explicit) ---!
-     else  
-       Res_l2 = 0.0
-       do iPoint=1,nPoint
-          R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
-          P_Correc(iPoint) = P_Correc(iPoint) - R(3,iPoint)*dt_p/Vol(iPoint)
-          Res_l2 = Res_l2 + R(3,iPoint)**2.0
-       enddo
-       
-       Res_l2 = sqrt(Res_l2/nPoint)
-     if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
-     endif 
-     
-     if (Piter .eq. nPIter)call compute_pcgradientgg
-      
-      
-  enddo   !PIter
+  call boundary_conditions
+
+  Res_l2 = 0.0
+
+  do iPoint=1,nPoint
+    R(3,iPoint) =  R(3,iPoint) + Mass(iPoint)
+    R(3,iPoint) = -R(3,iPoint)
+
+    Res_l2 = Res_l2 + R(3,iPoint)**2.0
+  enddo
+
+  Res_l2 = sqrt(Res_l2/nPoint)
+  !if ((modulo(PIter,p_screen2)).eq.0) print*,'Res(p): ',log10(Res_l2),PIter,ExtIter
+
+  !--- Solve pressure correction equation ---!
+  call seidel(0,nPoint,Jac(:,:),R(3,:),0.5,Sol(3,:),Res(:),liniter,convergence)
+  if ((convergence .ne. 0) .and. (convergence .ne. 4)) print*, 'Error in p',convergence,ExtIter
+
+  do iPoint = 1,nPoint
+    P_Correc(iPoint) = P_Correc(iPoint) + Sol(3,iPoint)
+  enddo
+
+  call compute_pcgradientgg
 
 end subroutine pressure_correc_eqn
 
@@ -170,7 +143,7 @@ integer     :: i, j, iPoint, jPoint
       !South
       R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx
       
-      !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+      Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -182,7 +155,7 @@ integer     :: i, j, iPoint, jPoint
      !North
      R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx
      
-     !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+     Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -193,7 +166,7 @@ integer     :: i, j, iPoint, jPoint
     Jac(iPoint,:) = 0.0
     !West
     R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy
-    !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -204,7 +177,7 @@ integer     :: i, j, iPoint, jPoint
     iPoint = i + (j-1)*Nx
     !East
     R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy
-    !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+    Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
 
    enddo
    
@@ -216,12 +189,12 @@ integer     :: i, j, iPoint, jPoint
    !Inlet face(West)
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy) 
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy) 
 
    
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
    
 
    i=1
@@ -231,12 +204,12 @@ integer     :: i, j, iPoint, jPoint
    !Inlet face(West)
    R(3,iPoint) = R(3,iPoint) + (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
 
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
           
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
       
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint)+ D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint)+ D(2,iPoint)*(dx/dy)
       
    i=Nx
    j=Ny
@@ -245,12 +218,12 @@ integer     :: i, j, iPoint, jPoint
    !East (outlet)
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
    !North
    R(3,iPoint) = R(3,iPoint) - D(1,iPoint)*GradPc(2,i,j)*dx/2.0
    
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
     
    i=Nx
@@ -260,12 +233,19 @@ integer     :: i, j, iPoint, jPoint
    !East
    R(3,iPoint) = R(3,iPoint) - (D(1,iPoint))*GradPc(1,i,j)*dy/2.0
    
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
       
    !South
    R(3,iPoint) = R(3,iPoint) + D(1,iPoint)*GradPc(2,i,j)*dx/2.0
          
-   !Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   Jac(iPoint,iPoint) = Jac(iPoint,iPoint) + D(2,iPoint)*(dx/dy)
+   
+   do iPoint=1,Nx*Ny
+    if (Jac(iPoint,iPoint) == 0) then 
+      Jac(iPoint,iPoint) = 1
+      R(3,iPoint) = 0
+    endif
+  enddo
 
 
 end subroutine boundary_conditions

@@ -86,7 +86,7 @@ use output_vars
 implicit none
 integer     :: i,j,iPoint
 
-  open(unit=101,file='../out/restart_flow.dat',status='unknown')
+  open(unit=101,file='../out/'//trim(file_rest)//'.dat',status='unknown')
   
   write(101,*) 'x, y, Velocity_x, Velocity_y, Pressure'
   
@@ -105,13 +105,14 @@ end subroutine write_restart
 subroutine read_restart
 
 use global_vars
+use output_vars
 
 implicit none
 integer              :: i,j,iPoint
 character(len=100)   :: filename
 character(len=9)     :: tab
 
-  filename = '../out/restart_flow.dat'
+  filename = '../out/'//trim(file_rest)//'.dat'
   open(unit=102,file=filename,status='unknown')
   
   if (len_TRIM(filename) == 0) then
