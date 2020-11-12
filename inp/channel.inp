@@ -20,8 +20,10 @@
  upwind = .true.
 ! true=2nd order, false=1st order 
  muscl = .true.
+! QUICK scheme (set upwind to true as well)
+ quick = .true.
 ! nr. of external iterations
- nExtIter = 15000
+ nExtIter = 1500
 /
 
 &io
@@ -32,13 +34,13 @@
 ! frequency of output files
  p_out = 100
 ! output file name
- file_out = 'flow_up2'
+ file_out = 'flow_q'
 ! read from restart file
- restart = .false.
+ restart = .true.
 ! frequency of restart files
  p_rest = 250
 ! restart file name (extension is always .dat and ASCII)
- file_rest = 'restart_flow_up2'
+ file_rest = 'restart_flow_q'
 /
 
 &numerics

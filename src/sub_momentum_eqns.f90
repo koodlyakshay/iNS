@@ -1,23 +1,21 @@
-subroutine momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
+subroutine momentum_eqns(extiter, implicit_time, upwind, muscl,quick)
 
 use global_vars
 
 implicit none
 
-integer     :: i,j
-integer     :: ExtIter, miter, nmiter
-logical     :: implicit_time, upwind, muscl
+integer             :: i,j
+integer,intent(in)  :: ExtIter
+logical,intent(in)  :: implicit_time, upwind, muscl,quick
 
 !----------------------------------------------------------------------!
    !--- SU2 equivalent: CPBFludIteration()::Iterate()->SinglegridIteration(momentum)
    call preprocessing_flow
-      
-   !--- No set time step as we use fixed time step given as input ---!
    
    !--- Compute spatial discretization (Space Integration) ---!
    
    !--- Convective terms (1st order upwind/Central) ---!
-   call convective_residual(upwind, muscl)
+   call convective_residual(upwind, muscl,quick)
        
    !--- Viscous terms ---!
    call viscous_residual
@@ -40,10 +38,10 @@ logical     :: implicit_time, upwind, muscl
    
    if (implicit_time) then
      !--- Time Integration (Implicit) ---!
-     call implicit_euler(miter, nmiter, extiter)
+     call implicit_euler(extiter)
    else   
      !--- Time Integration (Explicit) ---!
-     call explicit_euler(miter, nmiter, extiter)
+     call explicit_euler(extiter)
    endif
    
 

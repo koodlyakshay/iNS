@@ -1,7 +1,7 @@
 !> \file sub_convective_residual.f90
 !! \brief Subroutine to compute residual contribution from convection terms of the momentum equations.
 
-subroutine convective_residual(upwind, muscl)
+subroutine convective_residual(upwind, muscl,quick)
 
 use global_vars
 use flow_parmaters
@@ -9,21 +9,17 @@ use flow_parmaters
 
 implicit none
 
-integer           :: i,j,iPoint,jpoint
-real              :: FaceFlux
-real              :: lambda_i,lambda_j
-real              :: lambda_mean
-real              :: E_0
-real              :: Phi_i
-real              :: Phi_j
-logical           :: upwind, muscl
-real              :: sc0
-real              :: SF
-real              :: artvisc = 4.0
-real              :: V_e, V_w, V_n, V_s
-real              :: U_e, U_w, U_n, U_s
-real              :: U_up, V_up
-real              :: F_e(2), F_w(2), F_n(2), F_s(2)
+logical,intent(in) :: upwind, muscl, quick
+integer            :: i,j,iPoint,jpoint, kPoint
+real               :: FaceFlux
+real               :: lambda_i,lambda_j,lambda_mean
+real               :: E_0, sc0, SF
+real               :: Phi_i, Phi_j
+real               :: artvisc = 4.0
+real               :: V_e, V_w, V_n, V_s
+real               :: U_e, U_w, U_n, U_s
+real               :: U_up, V_up
+real               :: F_e(2), F_w(2), F_n(2), F_s(2)
 
 
 E_0 = 0.0
@@ -46,10 +42,30 @@ do i=1,Nx
       if (upwind) then
         FaceFlux = rho*U_e*dy
         if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_e*dy/2.0
+
         if (FaceFlux .gt. 0.0) then
-          call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),dx/2.0,1,F_e)
+          if (quick) then
+            if (i .eq. 1) then 
+              call upwind_res(.true., FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),dx/2.0,1,F_e)
+            else 
+              kPoint = i-1 + (j-1)*Nx
+              call quick_res(FaceFlux,U_old(:,iPoint),U_old(:,jPoint),U_old(:,kPoint),1,F_e)
+            endif
+          else
+            call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),dx/2.0,1,F_e)
+          endif
+
         else
-          call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,1,i+1,j),-dx/2.0,-1,F_e)
+          if (quick) then
+            if (i .eq. Nx-1) then
+              call upwind_res(.true., FaceFlux, U_old(:,jPoint),GradU(:,1,i+1,j),-dx/2.0,1,F_e)
+            else 
+              kPoint = i+2 + (j-1)*Nx
+              call quick_res(FaceFlux,U_old(:,jPoint),U_old(:,iPoint),U_old(:,kPoint),1,F_e)
+            endif
+          else
+            call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,1,i+1,j),-dx/2.0,1,F_e)
+          endif
         endif
       else
         call centered_res(U_old(:,iPoint),U_old(:,jPoint),dy,1,1,F_e)
@@ -75,9 +91,27 @@ do i=1,Nx
          FaceFlux = rho*U_w*dy
          if ((j.eq.1).or.(j.eq.Ny)) FaceFlux = rho*U_w*dy/2.0
          if (FaceFlux .gt. 0.0) then
-           call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,1,i-1,j),dx/2.0,-1,F_w)
+           if (quick) then
+             if (i.eq.2) then
+               call upwind_res(.true., FaceFlux, U_old(:,jPoint),GradU(:,1,i-1,j),dx/2.0,-1,F_w)
+             else
+               kPoint = i-2 + (j-1)*Nx
+               call quick_res(FaceFlux,U_old(:,jPoint),U_old(:,iPoint),U_old(:,kPoint),-1,F_w)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,1,i-1,j),dx/2.0,-1,F_w)
+           endif
          else
-           call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),-dx/2.0,-1,F_w)
+           if (quick) then
+             if(i .eq. Nx) then
+               call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),-dx/2.0,-1,F_w)
+             else
+               kPoint = i+1 + (j-1)*Nx
+               call quick_res(FaceFlux,U_old(:,iPoint),U_old(:,jPoint),U_old(:,kPoint),-1,F_w)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,1,i,j),-dx/2.0,-1,F_w)
+           endif
          endif
        else
          call centered_res(U_old(:,iPoint),U_old(:,jPoint),dy,1,-1,F_w)
@@ -103,9 +137,27 @@ do i=1,Nx
          FaceFlux = rho*V_n*dx
          if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_n*dx/2.0
          if (FaceFlux .gt. 0.0) then
-           call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),dy/2.0,1,F_n)
+           if (quick) then
+             if (j.eq.1) then 
+               call upwind_res(.true., FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),dy/2.0,1,F_n)
+             else
+               kPoint = i + (j-1-1)*Nx
+               call quick_res(FaceFlux,U_old(:,iPoint),U_old(:,jPoint),U_old(:,kPoint),1,F_n)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),dy/2.0,1,F_n)
+           endif
          else
-           call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,2,i,j+1),-dy/2.0,1,F_n)
+           if (quick) then
+             if (j.eq.Ny-1) then
+               call upwind_res(.true., FaceFlux, U_old(:,jPoint),GradU(:,2,i,j+1),-dy/2.0,1,F_n)
+             else
+               kPoint = i + (j-1+2)*Nx
+               call quick_res(FaceFlux,U_old(:,jPoint),U_old(:,iPoint),U_old(:,kPoint),1,F_n)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,2,i,j+1),-dy/2.0,1,F_n)
+           endif
          endif
        else
          call centered_res(U_old(:,iPoint),U_old(:,jPoint),dx,2,1,F_n)
@@ -131,9 +183,27 @@ do i=1,Nx
          FaceFlux = rho*V_s*dx
          if ((i.eq.1).or.(i.eq.Nx)) FaceFlux = rho*V_s*dx/2.0
          if (FaceFlux .gt. 0.0) then
-           call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,2,i,j-1),dy/2.0,-1,F_s)
+           if (quick) then
+             if (j.eq.2) then
+               call upwind_res(.true., FaceFlux, U_old(:,jPoint),GradU(:,2,i,j-1),dy/2.0,-1,F_s)
+             else
+               kPoint = i + (j-1-2)*Nx
+               call quick_res(FaceFlux,U_old(:,jPoint),U_old(:,iPoint),U_old(:,kPoint),-1,F_s)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,jPoint),GradU(:,2,i,j-1),dy/2.0,-1,F_s)
+           endif
          else
-           call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),-dy/2.0,-1,F_s)
+           if (quick) then
+             if (j.eq.Ny) then 
+               call upwind_res(.true., FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),-dy/2.0,-1,F_s)
+             else  
+               kPoint = i + (j-1+1)*Nx
+               call quick_res(FaceFlux, U_old(:,iPoint), U_old(:,jPoint),U_old(:,kPoint),-1,F_s)
+             endif
+           else
+             call upwind_res(muscl, FaceFlux, U_old(:,iPoint),GradU(:,2,i,j),-dy/2.0,-1,F_s)
+           endif
          endif
        else
          call centered_res(U_old(:,iPoint),U_old(:,jPoint),dx,2,-1,F_s)
@@ -164,6 +234,8 @@ end subroutine convective_residual
 
 subroutine centered_res(U_i,U_j,area,nrml,dir,cenRes)
 
+! Subroutine to calculate centered residual
+
 use global_vars, only: rho
 
 implicit none
@@ -178,14 +250,16 @@ FF = rho*U_f*area
 
 !Get artificial dissipation
 call getdissipation(U_i,U_j,area,nrml,diss)
-!Calculate Residual
 
+!Calculate Residual
 cenRes(:) = FF*0.5*(U_i(:) + U_j(:))*dir + diss(:)
 
 
 end subroutine centered_res
 
 subroutine getdissipation(U_i, U_j, area,nrml,diss)
+
+! Subroutine to get artificial dissipation for central scheme
 
 use flow_parmaters
 use global_vars, only: rho
@@ -231,11 +305,7 @@ end subroutine getdissipation
 
 subroutine upwind_res(muscl, FF, U_up, GradU_up, dist, dir,UpRes)
 
-!muscl - bool to indicate muscl scheme
-!FF    - Face flux a real scalar
-!i,j   - index of current point
-!dir   - direction 1 -> E, 2 -> W, 3 -> N, 4 -> S
-!UpRes - result
+!Subroutine to compute upwind residual either with first order scheme or muscl reconstruction
 
 implicit none
 
@@ -247,13 +317,17 @@ real               :: U_recon(2)
 
 U_recon = U_up
 
+! Reconstruct if necessary
 if (muscl) call recon(U_up,GradU_up, dist, U_recon)
 
+! Calculate the flux
 UpRes(:) = FF*U_recon(:)*dir
 
 end subroutine upwind_res
 
 subroutine recon(U_var,GradUvar, dist, U_recon)
+
+!Subroutine to reconstruct variable
 
 implicit none
 
@@ -263,3 +337,26 @@ real,intent(out) :: U_recon(2)
 U_recon(:) = U_var(:) + GradUvar(:)*dist
 
 end subroutine recon
+
+subroutine quick_res(FF, U_C, U_E, U_UP1, dir, UpRes)
+
+! Subroutine to calculate residual using QUICK scheme
+
+implicit none
+real,intent(in)     :: FF,U_C(2),U_E(2),U_UP1(2)
+real,intent(out)    :: UpRes(2)
+integer,intent(in)  :: dir
+real                :: coeff_c, coeff_e, coeff_up1,U_recon(2)
+
+!Assuming equal spacing in each dir
+coeff_c = 6.0/8.0
+coeff_e = 3.0/8.0
+coeff_up1 = -1.0/8.0
+
+! Face Velocity
+U_recon(:) = coeff_c*U_C(:) + coeff_e*U_E(:) + coeff_up1*U_UP1(:)
+
+! Residual
+UpRes(:) = FF*U_recon(:)*dir
+
+end subroutine quick_res

@@ -23,7 +23,7 @@ enddo
 
 endsubroutine set_time_step
 
-subroutine explicit_euler(miter, nmiter, extiter)
+subroutine explicit_euler(extiter)
 
 use global_vars
 use output_vars
@@ -60,7 +60,7 @@ real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
 
 end subroutine explicit_euler
 
-subroutine implicit_euler(miter, nmiter, extiter)
+subroutine implicit_euler(extiter)
 
 use global_vars
 use output_vars

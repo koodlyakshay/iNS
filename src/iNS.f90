@@ -51,7 +51,7 @@ do ExtIter = 1,nExtIter
 
   !---------------------- Solve momentum equation -----------------------!
 
-  call momentum_eqns(nmiter, extiter, implicit_time, upwind, muscl)
+  call momentum_eqns(extiter, implicit_time, upwind, muscl,quick)
 
   !--- Compute residual mass flux from vel solution ---!
   call compute_massflux(extiter)

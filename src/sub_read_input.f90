@@ -19,7 +19,7 @@ implicit none
 
 
 namelist            /grid/ Lx,Ly,Nx,Ny,xmin,ymin
-namelist            /solver/ implicit_time,upwind,muscl,nExtIter
+namelist            /solver/ implicit_time,upwind,muscl,quick,nExtIter
 namelist            /io/ p_screen1,p_screen2,p_out,file_out,restart,p_rest,file_rest
 namelist            /numerics/ kappa,Param_p,cfl
 namelist            /flow/ U_inf,rho,mu,Re_l,P_inf
