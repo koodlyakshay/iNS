@@ -27,11 +27,15 @@ program iNS
 use global_vars
 use output_vars
 use parameters
+use omp_lib
 
 implicit none
 
-integer           :: ExtIter
+integer           :: ExtIter,num_threads
 logical           :: old
+real              :: start,finish
+
+start = omp_get_wtime()
 
 inquire(file = '../out/',exist=old)
 
@@ -85,6 +89,14 @@ call sub_output
 !--- Deallocate variables ---!
 call delete_vars
 
+finish = omp_get_wtime()
+print*,'Time elapsed (s): ',finish - start
+
+!$OMP PARALLEL
+num_threads = omp_get_num_threads()
+!$OMP END PARALLEL
+
+print*,'Num of threads: ',num_threads
 end program iNS
 
 

@@ -36,7 +36,7 @@
 ! output file name
  file_out = 'flow_q'
 ! read from restart file
- restart = .true.
+ restart = .false.
 ! frequency of restart files
  p_rest = 250
 ! restart file name (extension is always .dat and ASCII)

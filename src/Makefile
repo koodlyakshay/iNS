@@ -40,15 +40,15 @@ OBJS =	iNS.o \
 	sub_variable_operations.o \
 	sub_viscous_residual.o
 
-LIBS =	
+LIBS =	-llapack
 
 CC = cc
 CFLAGS = -O
 FC = f77
 FFLAGS = -O
 F90 = gfortran
-F90FLAGS = -O3 -g -fdefault-real-8 -Wno-tabs -fbounds-check -fbacktrace -ffree-line-length-none
-LDFLAGS = -s
+F90FLAGS = -O3 -g -fopenmp -fdefault-real-8 -Wno-tabs -fbounds-check -fbacktrace -ffree-line-length-none
+LDFLAGS = -s -fopenmp
 
 all: $(PROG)
 

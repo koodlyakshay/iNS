@@ -68,8 +68,8 @@ use flow_parmaters
 
 implicit none
 
-integer           :: iPoint, nPoint
-integer           :: ExtIter, miter, nmiter
+integer           :: iPoint, nPoint, nsize
+integer           :: ExtIter, miter, nmiter,ipiv(Nx*Ny*nVar)
 integer           :: convergence, liniter
 real              :: Res_l2
 real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
@@ -81,6 +81,7 @@ real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
   
   call set_time_step
   
+!  !$OMP PARALLEL DO DEFAULT(NONE), PRIVATE(iPoint), SHARED(nVar,Tot_Sol,Tot_R,R,Tot_Jac,D,Vol,dt_m),REDUCTION(+:Res_l2)
   do iPoint=1,nPoint
     Tot_R((iPoint-1)*nVar+1) = -R(1,iPoint)
     Tot_R((iPoint-1)*nVar+2) = -R(2,iPoint)
@@ -95,8 +96,9 @@ real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
     D(2,iPoint) = Vol(iPoint)/Tot_Jac((iPoint-1)*nVar+2,(iPoint-1)*nVar+2)
     
     Res_l2 = Res_l2 + R(1,iPoint)**2.0
-
+   
   enddo
+!  !$OMP END PARALLEL DO
      
    convergence = -2
    liniter = 1000
@@ -105,13 +107,21 @@ real              :: Tot_Sol(Nx*Ny*nVar), Tot_R(Nx*Ny*nVar)
    call seidel(0,nPoint*nVar,Mat(1:npoint*nvar,1:npoint*nvar),Tot_R(1:npoint*nvar),1.0,Tot_Sol(1:npoint*nvar), &
                         Res(1:npoint*nvar),liniter,convergence)
    if ((convergence .ne. 0) .and. (convergence .ne. 4)) print*, 'Error in mom',convergence,ExtIter
+   
+   !nSize = nPoint*nVar
+   !call dgesv(nSize,1,Mat(1:nSize,1:nSize),nSize,ipiv,Tot_R(1:nSize),nSize,convergence)
+   
+   !if ((convergence .ne. 0)) print*, 'Error in mom',convergence,ExtIter
+   !Tot_Sol = Tot_R
+   
    !if (modulo(ExtIter,5000) .eq. 0) print*,'Finished mom'
    Res_l2 = sqrt(Res_l2/nPoint)
    if ((modulo(ExtIter,p_out) .eq. 0)) print*,'Res: ',log10(Res_l2),ExtIter
-   
+!   !$OMP PARALLEL DO DEFAULT(NONE), PRIVATE(iPoint), SHARED(nVar,U,U_old,Tot_Sol)
    do iPoint =1,nPoint
       U(1,iPoint) = U_old(1,iPoint) + Tot_Sol((iPoint-1)*nVar+1)
       U(2,iPoint) = U_old(2,iPoint) + Tot_Sol((iPoint-1)*nVar+2)
    enddo
+!   !$OMP END PARALLEL DO
    
 end subroutine implicit_euler

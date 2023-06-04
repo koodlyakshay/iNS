@@ -12,98 +12,82 @@ integer           :: i,j
 
 !--- Compute gradients at nodes ---!
    do i=2,Nx-1
+!   !$OMP PARALLEL DO DEFAULT(NONE) FIRSTPRIVATE(i) SHARED(GradU,V,dx,Ny) PRIVATE(j)
     do j=1,Ny
        !--- (var,dim,i,j) ---!
-       GradU(1,1,i,j) = (V(1,i+1,j) - V(1,i-1,j))/(2.0*dx)
-       GradU(2,1,i,j) = (V(2,i+1,j) - V(2,i-1,j))/(2.0*dx)
-       GradU(3,1,i,j) = (V(3,i+1,j) - V(3,i-1,j))/(2.0*dx)
+       GradU(:,1,i,j) = (V(:,i+1,j) - V(:,i-1,j))/(2.0*dx)
     enddo
+!   !$OMP END PARALLEL DO
    enddo
    
    do i=1,Nx
+ !  !$OMP PARALLEL DO DEFAULT(NONE) FIRSTPRIVATE(i) SHARED(GradU,V,dy,Ny) PRIVATE(j)
     do j=2,Ny-1
        !--- (var,dim,i,j) ---!
-       GradU(1,2,i,j) = (V(1,i,j+1) - V(1,i,j-1))/(2.0*dy)
-       GradU(2,2,i,j) = (V(2,i,j+1) - V(2,i,j-1))/(2.0*dy)
-       GradU(3,2,i,j) = (V(3,i,j+1) - V(3,i,j-1))/(2.0*dy)
+       GradU(:,2,i,j) = (V(:,i,j+1) - V(:,i,j-1))/(2.0*dy)
     enddo
+!    !$OMP END PARALLEL DO
    enddo
    
    i=1
+!   !$OMP PARALLEL DO DEFAULT(NONE) SHARED(GradU,V,dx,Ny,i) PRIVATE(j)
    do j=2,Ny-1
      !--- (var,dim,i,j) ---!
-     GradU(1,1,i,j) = (V(1,i+1,j) - V(1,i,j))/(dx)
-     GradU(2,1,i,j) = (V(2,i+1,j) - V(2,i,j))/(dx)
-     GradU(3,1,i,j) = (V(3,i+1,j) - V(3,i,j))/(dx)
+     GradU(:,1,i,j) = (V(:,i+1,j) - V(:,i,j))/(dx)
      !print*,i + (j-1)*Nx,'BC left d/dx'
    enddo
+!   !$OMP END PARALLEL DO
    
    i=Nx
+!   !$OMP PARALLEL DO DEFAULT(NONE) SHARED(GradU,V,dx,Ny,i) PRIVATE(j)
    do j=2,Ny-1
      !--- (var,dim,i,j) ---!
-     GradU(1,1,i,j) = (V(1,i,j) - V(1,i-1,j))/(dx)
-     GradU(2,1,i,j) = (V(2,i,j) - V(2,i-1,j))/(dx)
-     GradU(3,1,i,j) = (V(3,i,j) - V(3,i-1,j))/(dx)
+     GradU(:,1,i,j) = (V(:,i,j) - V(:,i-1,j))/(dx)
      !print*,i + (j-1)*Nx,'BC right d/dx'
    enddo
+!   !$OMP END PARALLEL DO
    
    j=Ny
+!   !$OMP PARALLEL DO DEFAULT(NONE) SHARED(GradU,V,dy,Nx,j) PRIVATE(i)
    do i=2,Nx-1
      !--- (var,dim,i,j) ---!
-     GradU(1,2,i,j) = (V(1,i,j) - V(1,i,j-1))/(dy)
-     GradU(2,2,i,j) = (V(2,i,j) - V(2,i,j-1))/(dy)
-     GradU(3,2,i,j) = (V(3,i,j) - V(3,i,j-1))/(dy)
+     GradU(:,2,i,j) = (V(:,i,j) - V(:,i,j-1))/(dy)
      !print*,i + (j-1)*Nx,'BC top d/dy'
    enddo
+!   !$OMP END PARALLEL DO
    
    j=1
+!   !$OMP PARALLEL DO DEFAULT(NONE) SHARED(GradU,V,dy,Nx,j) PRIVATE(i)
    do i=2,Nx-1
      !--- (var,dim,i,j) ---!
-     GradU(1,2,i,j) = (V(1,i,j+1) - V(1,i,j))/(dy)
-     GradU(2,2,i,j) = (V(2,i,j+1) - V(2,i,j))/(dy)
-     GradU(3,2,i,j) = (V(3,i,j+1) - V(3,i,j))/(dy)
+     GradU(:,2,i,j) = (V(:,i,j+1) - V(:,i,j))/(dy)
      !print*,i + (j-1)*Nx,'BC bottom d/dy'
    enddo
+!   !$OMP END PARALLEL DO
    
    i=Nx
    j=Ny
    !--- (var,dim,i,j) ---!
-   GradU(1,1,i,j) = (V(1,i,j) - V(1,i-1,j))/dx
-   GradU(1,2,i,j) = (V(1,i,j) - V(1,i,j-1))/dy
-   GradU(2,1,i,j) = (V(2,i,j) - V(2,i-1,j))/dx
-   GradU(2,2,i,j) = (V(2,i,j) - V(2,i,j-1))/dy
-   GradU(3,1,i,j) = (V(3,i,j) - V(3,i-1,j))/dx
-   GradU(3,2,i,j) = (V(3,i,j) - V(3,i,j-1))/dy
+   GradU(:,1,i,j) = (V(:,i,j) - V(:,i-1,j))/dx
+   GradU(:,2,i,j) = (V(:,i,j) - V(:,i,j-1))/dy
    
    i=1
    j=1
    !--- (var,dim,i,j) ---!
-   GradU(1,1,i,j) = (V(1,i+1,j) - V(1,i,j))/dx
-   GradU(1,2,i,j) = (V(1,i,j+1) - V(1,i,j))/dy
-   GradU(2,1,i,j) = (V(2,i+1,j) - V(2,i,j))/dx
-   GradU(2,2,i,j) = (V(2,i,j+1) - V(2,i,j))/dy
-   GradU(3,1,i,j) = (V(3,i+1,j) - V(3,i,j))/dx
-   GradU(3,2,i,j) = (V(3,i,j+1) - V(3,i,j))/dy
+   GradU(:,1,i,j) = (V(:,i+1,j) - V(:,i,j))/dx
+   GradU(:,2,i,j) = (V(:,i,j+1) - V(:,i,j))/dy
 
    i=1
    j=Ny
    !--- (var,dim,i,j) ---!
-   GradU(1,1,i,j) = (V(1,i+1,j) - V(1,i,j))/dx
-   GradU(1,2,i,j) = (V(1,i,j) - V(1,i,j-1))/dy
-   GradU(2,1,i,j) = (V(2,i+1,j) - V(2,i,j))/dx
-   GradU(2,2,i,j) = (V(2,i,j) - V(2,i,j-1))/dy
-   GradU(3,1,i,j) = (V(3,i+1,j) - V(3,i,j))/dx
-   GradU(3,2,i,j) = (V(3,i,j) - V(3,i,j-1))/dy
+   GradU(:,1,i,j) = (V(:,i+1,j) - V(:,i,j))/dx
+   GradU(:,2,i,j) = (V(:,i,j) - V(:,i,j-1))/dy
       
    i=Nx
    j=1
    !--- (var,dim,i,j) ---!
-   GradU(1,1,i,j) = (V(1,i,j) - V(1,i-1,j))/dx
-   GradU(1,2,i,j) = (V(1,i,j+1) - V(1,i,j))/dy
-   GradU(2,1,i,j) = (V(2,i,j) - V(2,i-1,j))/dx
-   GradU(2,2,i,j) = (V(2,i,j+1) - V(2,i,j))/dy
-   GradU(3,1,i,j) = (V(3,i,j) - V(3,i-1,j))/dx
-   GradU(3,2,i,j) = (V(3,i,j+1) - V(3,i,j))/dy
+   GradU(:,1,i,j) = (V(:,i,j) - V(:,i-1,j))/dx
+   GradU(:,2,i,j) = (V(:,i,j+1) - V(:,i,j))/dy
 
 end subroutine compute_gradient
 
